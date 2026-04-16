@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "662948067326",
+    "project_id": "st182-xylophone-learning-music",
+    "storage_bucket": "st182-xylophone-learning-music.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662948067326:android:3870295a71454df69d72af",
+        "android_client_info": {
+          "package_name": "com.temm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAKquMsAjTjE3zMdT4iwNlLKU0iDxfs9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

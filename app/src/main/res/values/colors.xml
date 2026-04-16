@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="splash">#17A0E4</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="orange_F6">#FFB44C</color>
+    <color name="purple_F0">#F091F5</color>
+    <color name="dark_purple">#181717</color>
+    <color name="red_app">#FF5959</color>
+    <color name="active_color">#FF5959</color>
+    <color name="inactive_color">#797878</color>
+
+</resources>
