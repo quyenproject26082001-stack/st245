@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity_app.main.MainActivity">
+
+    <!-- Background Image -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_bg_app" />
+
+    <!-- Action Bar -->
+    <FrameLayout
+        android:id="@+id/layoutActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/actionBar"
+            layout="@layout/layout_actionbar" />
+    </FrameLayout>
+
+    <!-- Title Image - Centered -->
+    <ImageView
+        android:id="@+id/titleHome"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/img_app_name"
+        app:layout_constraintDimensionRatio="312:40"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutActionBar" />
+
+    <!-- Frame Home -->
+    <ImageView
+        android:id="@+id/frameHome"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleHome" />
+
+    <!-- Button My Creation (Top - Full Width) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/btnPlayHome"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="0dp"
+        android:clipChildren="true"
+        android:clipToPadding="true"
+        app:layout_constraintDimensionRatio="296:144"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/frameHome">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/img_home_1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.temm.core.custom.text.StrokeGradientTextView
+            android:id="@+id/tv1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:clipToOutline="false"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fontFamily="@font/cherrybombone_regular"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingHorizontal="12dp"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:text="@string/play"
+            android:paddingVertical="8dp"
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_item_home"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="8dp"
+  />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/glLeft1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.4" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Button My Creation (Top - Full Width) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/btnSecret"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="20dp"
+        android:clipToOutline="false"
+        android:elevation="4dp"
+        app:layout_constraintDimensionRatio="296:144"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnPlayHome"
+        app:strokeColor="@color/transparent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/img_home_2"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.temm.core.custom.text.StrokeGradientTextView
+            android:id="@+id/tv2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fontFamily="@font/sigmar_regular"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="@string/my_record"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            app:fontFamily="@font/cherrybombone_regular"
+            android:paddingHorizontal="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingVertical="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_item_home"
+      />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/glLeft2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.3" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

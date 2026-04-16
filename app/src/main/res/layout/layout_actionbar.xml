@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="158dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:clipToPadding="false"
+    android:clipToOutline="false"
+    android:clipChildren="false"
+    android:background="@color/transparent">
+
+
+
+    <!--    btnActionBarLeft-->
+    <ImageView
+        android:id="@+id/btnActionBarLeft"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="28dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+    <!--    tvStart-->
+    <TextView
+        android:id="@+id/tvStart"
+        style="@style/single_marquee"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:fontFamily="@font/cherrybombone_regular"
+        android:gravity="start|bottom"
+        android:text="@string/language"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
+        app:layout_constraintEnd_toStartOf="@+id/btnActionBarRight"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft" />
+
+    <!--    tvCenter-->
+    <TextView
+        android:id="@+id/tvCenter"
+        style="@style/single_marquee"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:fontFamily="@font/cherrybombone_regular"
+        android:gravity="center"
+        android:minHeight="36dp"
+        android:text="@string/language"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintDimensionRatio="164:36"
+        android:paddingVertical="8dp"
+        android:background="@drawable/bg_tv"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
+        app:layout_constraintEnd_toStartOf="@+id/btnActionBarRight"
+        app:layout_constraintStart_toEndOf="@+id/btnActionBarLeft"
+        app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft" />
+
+    <!--    btnActionBarNextToRight-->
+    <ImageView
+        android:id="@+id/btnActionBarNextToRight"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="10dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnActionBarRight" />
+
+    <!--    btnActionBarRight-->
+    <ImageView
+        android:id="@+id/btnActionBarRight"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="28dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!--            btnActionBarRightText-->
+    <FrameLayout
+        android:id="@+id/btnActionBarRightText"
+        android:layout_width="58dp"
+        android:layout_height="72dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="visible"
+        android:clipToPadding="false"
+        android:clipToOutline="false"
+        android:clipChildren="false"
+        tools:background="@drawable/ic_settings"
+        app:layout_constraintBottom_toBottomOf="@+id/btnActionBarRight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnActionBarRight">
+
+        <com.temm.core.custom.text.DoubleStrokeTextView
+            android:id="@+id/tvRightText"
+            style="@style/single_marquee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/cherrybombone_regular"
+            android:gravity="center"
+            android:text="@string/settings"
+            app:outerStrokeColor="#000000"
+            app:outerStrokeWidth="2dp"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
