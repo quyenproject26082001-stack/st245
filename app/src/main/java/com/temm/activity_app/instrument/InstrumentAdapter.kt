@@ -3,59 +3,67 @@ package com.temm.activity_app.instrument
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import android.graphics.drawable.Drawable
 import com.temm.R
 import com.temm.data.model.custom.InstrumentModel
 import com.temm.databinding.ItemInstrumentBinding
 
-class InstrumentAdapter : ListAdapter<InstrumentModel, InstrumentAdapter.ViewHolder>(DiffCallback()) {
+class InstrumentAdapter : RecyclerView.Adapter<InstrumentAdapter.ViewHolder>() {
 
-
-    // Fragment uses this lambda to listen for item clicks
     var onItemClick: ((InstrumentModel) -> Unit) = {}
 
+    private val items = mutableListOf<InstrumentModel>()
+    val currentList: List<InstrumentModel> get() = items
 
-    // ViewHolder holds the binding for each item in the list
     inner class ViewHolder(val binding: ItemInstrumentBinding) : RecyclerView.ViewHolder(binding.root)
 
-    // Called when RecyclerView needs a new ViewHolder (inflates item_instrument.xml)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemInstrumentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
-    // Binds data to the ViewHolder at the given position
+    override fun getItemCount() = items.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = getItem(position) // use getItem() — ListAdapter owns the list
-        val stream = holder.itemView.context.assets.open(item.navPath)
-        holder.binding.ivCharacter.setImageDrawable(Drawable.createFromStream(stream, null))
-        stream.close()
+        val item = items[position]
+        item.drawable?.let { holder.binding.ivCharacter.setImageDrawable(it) }
         when {
+            !item.isAvailable -> {
+                holder.binding.tvUse.setText(R.string.no_skin)
+                holder.binding.tvUse.setBackgroundResource(R.drawable.bg_unavailable_instrument)
+                holder.binding.root.alpha = 0.5f
+            }
             !item.isUnlocked -> {
                 holder.binding.tvUse.setText(R.string.unlock)
                 holder.binding.tvUse.setBackgroundResource(R.drawable.bg_unlock_character)
+                holder.binding.root.alpha = 1f
             }
             item.isSelected -> {
                 holder.binding.tvUse.setText(R.string.used)
                 holder.binding.tvUse.setBackgroundResource(R.drawable.bg_used_character)
+                holder.binding.root.alpha = 1f
             }
             else -> {
                 holder.binding.tvUse.setText(R.string.use)
                 holder.binding.tvUse.setBackgroundResource(R.drawable.bg_use_character)
+                holder.binding.root.alpha = 1f
             }
         }
-
-
         holder.binding.root.setOnClickListener { onItemClick(item) }
     }
 
-    // DiffCallback: compares old and new list to find the minimum changes
-    class DiffCallback : DiffUtil.ItemCallback<InstrumentModel>() {
-        // Question 1: Is this the same item? → compare by ID
-        override fun areItemsTheSame(oldItem: InstrumentModel, newItem: InstrumentModel) = oldItem.id == newItem.id
-        // Question 2: Did the content change? → data class compares all fields with ==
-        override fun areContentsTheSame(oldItem: InstrumentModel, newItem: InstrumentModel) = oldItem == newItem
+    fun submitList(newList: List<InstrumentModel>) {
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = items.size
+            override fun getNewListSize() = newList.size
+            override fun areItemsTheSame(op: Int, np: Int) = items[op].id == newList[np].id
+            override fun areContentsTheSame(op: Int, np: Int) =
+                items[op].isUnlocked == newList[np].isUnlocked &&
+                items[op].isSelected == newList[np].isSelected &&
+                items[op].isAvailable == newList[np].isAvailable
+        })
+        items.clear()
+        items.addAll(newList)
+        diff.dispatchUpdatesTo(this)
     }
 }

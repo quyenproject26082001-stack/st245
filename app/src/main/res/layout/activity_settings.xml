@@ -162,6 +162,54 @@
 
             </LinearLayout>
 
+            <!--            btnUnlockAll-->
+            <LinearLayout
+                android:id="@+id/btnUnlockAll"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_settings"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginVertical="17dp"
+                        android:src="@drawable/ic_more_set" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="8"
+                    android:fontFamily="@font/cherrybombone_regular"
+                    android:gravity="center_vertical"
+                    android:text="@string/unlock_all"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/imgUnlockAllToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_sw_off" />
+
+            </LinearLayout>
+
             <!--            btnPolicy-->
             <LinearLayout
                 android:id="@+id/btnPolicy"

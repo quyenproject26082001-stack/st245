@@ -57,5 +57,6 @@ class IntroActivity : BaseActivity<ActivityIntroBinding>() {
     }
 
     @SuppressLint("MissingSuperCall", "GestureBackNavigation")
-    override fun onBackPressed() { exitProcess(0) }
+    override fun onBackPressed() { finishAffinity()
+        exitProcess(0) }
 }

@@ -45,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/bg_frame_song"
         app:layout_constraintDimensionRatio="312:84"
         app:layout_constraintTop_toBottomOf="@id/btnCharacter">
@@ -115,7 +115,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="22dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/bgFrame"
         android:id="@+id/notes8"
         >

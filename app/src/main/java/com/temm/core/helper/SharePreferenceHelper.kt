@@ -198,4 +198,13 @@ class SharePreferenceHelper(val context: Context) {
     fun setSelectedBackground(id: String) {
         preferences.edit().putString(SharePreferenceKey.SELECTED_BACKGROUND_KEY, id).apply()
     }
+
+    // Unlock All
+    fun getUnlockAll(): Boolean {
+        return preferences.getBoolean(SharePreferenceKey.UNLOCK_ALL_KEY, false)
+    }
+
+    fun setUnlockAll(enabled: Boolean) {
+        preferences.edit().putBoolean(SharePreferenceKey.UNLOCK_ALL_KEY, enabled).apply()
+    }
 }
