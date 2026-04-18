@@ -1,8 +1,11 @@
 package com.temm.data.model.custom
 
+import android.graphics.drawable.Drawable
+
 data class CharacterModel(
-    val id: String,              // ID duy nhất để DiffUtil nhận diện item
-    val avatarPath: String,      // đường dẫn ảnh trong assets, vd: "skin/1/avatar.png"
+    val id: String,
+    val avatarPath: String,
     val isUnlocked: Boolean = false,
-    val isSelected: Boolean = false
+    val isSelected: Boolean = false,
+    val drawable: Drawable? = null
 )

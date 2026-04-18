@@ -26,6 +26,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
 
     override fun initView() {
         initRate()
+        initUnlockAll()
     }
 
     override fun viewListener() {
@@ -41,6 +42,7 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
                 }
             }
             btnPolicy.setOnSingleClick(1500) { policy() }
+            btnUnlockAll.setOnSingleClick { toggleUnlockAll() }
         }
     }
 
@@ -64,5 +66,21 @@ class SettingsActivity : BaseActivity<ActivitySettingsBinding>() {
         } else {
             binding.btnRate.visible()
         }
+    }
+
+    private fun initUnlockAll() {
+        updateUnlockAllToggle(sharePreference.getUnlockAll())
+    }
+
+    private fun toggleUnlockAll() {
+        val newState = !sharePreference.getUnlockAll()
+        sharePreference.setUnlockAll(newState)
+        updateUnlockAllToggle(newState)
+    }
+
+    private fun updateUnlockAllToggle(enabled: Boolean) {
+        binding.imgUnlockAllToggle.setImageResource(
+            if (enabled) R.drawable.ic_sw_on else R.drawable.ic_sw_off
+        )
     }
 }

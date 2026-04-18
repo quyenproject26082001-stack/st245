@@ -14,4 +14,5 @@ object SharePreferenceKey {
     const val UNLOCKED_INSTRUMENTS_KEY = "unlocked_instruments"
     const val SELECTED_CHARACTER_KEY = "selected_character"
     const val SELECTED_BACKGROUND_KEY = "selected_background"
+    const val UNLOCK_ALL_KEY = "unlock_all"
 }

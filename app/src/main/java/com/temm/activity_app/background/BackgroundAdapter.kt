@@ -3,34 +3,30 @@ package com.temm.activity_app.background
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.temm.R
 import com.temm.data.model.custom.BackgroundItemModel
 import com.temm.databinding.ItemBackgroundBinding
 
-class BackgroundAdapter : ListAdapter<BackgroundItemModel, BackgroundAdapter.ViewHolder>(DiffCallback()) {
+class BackgroundAdapter : RecyclerView.Adapter<BackgroundAdapter.ViewHolder>() {
 
-    // Fragment uses this lambda to listen for item clicks
     var onItemClick: ((BackgroundItemModel) -> Unit) = {}
 
-    // ViewHolder holds the binding for each item in the list
+    private val items = mutableListOf<BackgroundItemModel>()
+    val currentList: List<BackgroundItemModel> get() = items
+
     inner class ViewHolder(val binding: ItemBackgroundBinding) : RecyclerView.ViewHolder(binding.root)
 
-    // Called when RecyclerView needs a new ViewHolder (inflates item_background.xml)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemBackgroundBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
-    // Binds data to the ViewHolder at the given position
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = getItem(position) // use getItem() — ListAdapter owns the list
-        val ctx = holder.itemView.context
-        val resId = ctx.resources.getIdentifier("bg_${item.id}", "drawable", ctx.packageName)
-        if (resId != 0) holder.binding.ivPreview.setImageResource(resId)
+    override fun getItemCount() = items.size
 
-        // Three states: unlock (locked) → use (unlocked, not active) → used (currently active)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = items[position]
+        if (item.previewResId != 0) holder.binding.ivPreview.setImageResource(item.previewResId)
         when {
             !item.isUnlocked -> {
                 holder.binding.tvUse.setText(R.string.unlock)
@@ -45,15 +41,20 @@ class BackgroundAdapter : ListAdapter<BackgroundItemModel, BackgroundAdapter.Vie
                 holder.binding.tvUse.setBackgroundResource(R.drawable.bg_use_character)
             }
         }
-
         holder.binding.root.setOnClickListener { onItemClick(item) }
     }
 
-    // DiffCallback: compares old and new list to find the minimum changes
-    class DiffCallback : DiffUtil.ItemCallback<BackgroundItemModel>() {
-        // Question 1: Is this the same item? → compare by ID
-        override fun areItemsTheSame(oldItem: BackgroundItemModel, newItem: BackgroundItemModel) = oldItem.id == newItem.id
-        // Question 2: Did the content change? → data class compares all fields with ==
-        override fun areContentsTheSame(oldItem: BackgroundItemModel, newItem: BackgroundItemModel) = oldItem == newItem
+    fun submitList(newList: List<BackgroundItemModel>) {
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = items.size
+            override fun getNewListSize() = newList.size
+            override fun areItemsTheSame(op: Int, np: Int) = items[op].id == newList[np].id
+            override fun areContentsTheSame(op: Int, np: Int) =
+                items[op].isUnlocked == newList[np].isUnlocked &&
+                items[op].isSelected == newList[np].isSelected
+        })
+        items.clear()
+        items.addAll(newList)
+        diff.dispatchUpdatesTo(this)
     }
 }

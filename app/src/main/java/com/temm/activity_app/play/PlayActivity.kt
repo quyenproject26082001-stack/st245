@@ -3,8 +3,14 @@ package com.temm.activity_app.play
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
+import android.text.StaticLayout
+import android.text.TextPaint
+import android.view.MotionEvent
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.lifecycleScope
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.LottieCompositionFactory
 import com.temm.R
 import com.temm.core.extensions.animateScaleEffect
 import com.temm.core.helper.NoteIconManager
@@ -12,12 +18,15 @@ import com.temm.activity_app.background.BackgroundAdapter
 import com.temm.activity_app.character.CharacterAdapter
 import com.temm.activity_app.instrument.InstrumentAdapter
 import com.temm.core.base.BaseActivity
-import com.temm.core.helper.SharePreferenceHelper
 import com.temm.data.model.custom.BackgroundItemModel
 import com.temm.data.model.custom.CharacterModel
 import com.temm.data.model.custom.InstrumentModel
 import com.temm.databinding.ActivityPlayBinding
 import com.temm.dialog.YesNoDialog
+import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
@@ -31,6 +40,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private val characterAdapter = CharacterAdapter()
     private val backgroundAdapter = BackgroundAdapter()
     private val instrumentAdapter = InstrumentAdapter()
+    private val lottieCache = HashMap<String, LottieComposition>()
 
     private lateinit var noteIconManager: NoteIconManager
     private data class Song(val name: String, val notes: String)
@@ -40,22 +50,55 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     override fun setViewBinding() = ActivityPlayBinding.inflate(layoutInflater)
 
     override fun initView() {
-        soundPlayer.load("piano", 8)
+        val savedCharacter = sharePreference.getSelectedCharacter()
+        if (savedCharacter.isNotEmpty()) currentSkinId = savedCharacter
+        val savedInstrument = sharePreference.getSelectedInstrument().lowercase()
+        if (savedInstrument.isNotEmpty()) currentInstrumentId = savedInstrument
+
+        soundPlayer.load(currentInstrumentId)
         binding.notes8.visibility = View.VISIBLE
         binding.notes2.visibility = View.GONE
-        showDefault()                         // show default character image on startup
+        showDefault()
 
-        // Lottie 6.x throws by default when parsing fails — override to prevent crash
-        binding.btnBackground.setFailureListener { /* ignore parse errors */ }
-        binding.btnBackground.setAnimation("bg/1.json")
-        binding.btnBackground.playAnimation()
-
+        binding.btnBackground.setFailureListener {}
         noteIconManager = NoteIconManager(this, binding.noteOverlay)
-        noteIconManager.setRandomSpawnPoints(5,-150f..150f, -10f..150f) // pre-generate 5 random spawn points within a 300x300 area
+        noteIconManager.setRandomSpawnPoints(5, -150f..150f, -10f..150f)
+
         setupCharacterPanel()
         setupBackgroundPanel()
         setupInstrumentPanel()
         setupSongGuide()
+
+        lifecycleScope.launch {
+            // Load and display the selected background first so it appears immediately
+            val savedBg = sharePreference.getSelectedBackground()
+            val selectedBgPath = if (savedBg.isNotEmpty()) "bg/$savedBg.json" else "bg/1.json"
+            withContext(Dispatchers.IO) {
+                LottieCompositionFactory.fromAssetSync(this@PlayActivity, selectedBgPath).value
+                    ?.let { lottieCache[selectedBgPath] = it }
+            }
+            lottieCache[selectedBgPath]?.let { binding.btnBackground.setComposition(it) }
+                ?: binding.btnBackground.setAnimation(selectedBgPath)
+            binding.btnBackground.playAnimation()
+
+            // Load all three in parallel — total wait = slowest, not sum
+            val charactersAsync = async(Dispatchers.IO) { loadCharacters() }
+            val backgroundsAsync = async(Dispatchers.IO) { loadBackgrounds() }
+            val instrumentsAsync = async(Dispatchers.IO) { loadInstruments() }
+
+            characterAdapter.submitList(charactersAsync.await())
+            val backgrounds = backgroundsAsync.await()
+            backgroundAdapter.submitList(backgrounds)
+            instrumentAdapter.submitList(instrumentsAsync.await())
+
+            // Preload remaining Lottie files in background (selected already cached above)
+            withContext(Dispatchers.IO) {
+                backgrounds.filter { it.jsonPath != selectedBgPath }.forEach { bg ->
+                    LottieCompositionFactory.fromAssetSync(this@PlayActivity, bg.jsonPath).value
+                        ?.let { lottieCache[bg.jsonPath] = it }
+                }
+            }
+        }
     }
 
     override fun initActionBar() {}
@@ -166,49 +209,50 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun setupCharacterPanel() {
         binding.rcvCharacterPanel.adapter = characterAdapter
-        characterAdapter.submitList(loadCharacters())
         characterAdapter.onItemClick = { clickedItem ->
             when {
                 !clickedItem.isUnlocked -> showUnlockCharacterDialog(clickedItem)
                 !clickedItem.isSelected -> {
-                    val pref = SharePreferenceHelper(this)
-                    pref.setSelectedCharacter(clickedItem.id)
+                    sharePreference.setSelectedCharacter(clickedItem.id)
                     characterAdapter.submitList(characterAdapter.currentList.map {
-                        it.copy(
-                            isSelected = it.id == clickedItem.id
-                        )
+                        it.copy(isSelected = it.id == clickedItem.id)
                     })
                     currentSkinId = clickedItem.id
-                    instrumentAdapter.submitList(loadInstruments())
+                    lifecycleScope.launch {
+                        val instruments = withContext(Dispatchers.IO) { loadInstruments() }
+                        instrumentAdapter.submitList(instruments)
+                    }
                     showDefault()
                     binding.panelCharacter.visibility = View.GONE
                 }
-
                 else -> binding.panelCharacter.visibility = View.GONE
             }
         }
     }
 
     private fun loadCharacters(): List<CharacterModel> {
-        val pref = SharePreferenceHelper(this)
-        val unlockedIds = pref.getUnlockedCharacters()
-        var selectedId = pref.getSelectedCharacter()
+        val unlockedIds = sharePreference.getUnlockedCharacters()
+        var selectedId = sharePreference.getSelectedCharacter()
         val folders = assets.list("skin") ?: return emptyList()
-        val validFolders =
-            folders.filter { assets.list("skin/$it")?.contains("avatar.png") == true }
+        val validFolders = folders.filter { assets.list("skin/$it")?.contains("avatar.png") == true }
         if (validFolders.isNotEmpty()) {
             val firstId = validFolders.first()
             if (unlockedIds.isEmpty()) {
-                unlockedIds.add(firstId); pref.setUnlockedCharacters(unlockedIds)
+                unlockedIds.add(firstId); sharePreference.setUnlockedCharacters(unlockedIds)
             }
             if (selectedId.isEmpty()) {
-                selectedId = firstId; pref.setSelectedCharacter(selectedId)
+                selectedId = firstId; sharePreference.setSelectedCharacter(selectedId)
             }
         }
+        val unlockAll = sharePreference.getUnlockAll()
         return validFolders.map { folder ->
+            val avatarPath = "skin/$folder/avatar.png"
+            val drawable = try { assets.open(avatarPath).use { Drawable.createFromStream(it, null) } } catch (e: Exception) { null }
             CharacterModel(
-                id = folder, avatarPath = "skin/$folder/avatar.png",
-                isUnlocked = unlockedIds.contains(folder), isSelected = folder == selectedId
+                id = folder, avatarPath = avatarPath,
+                isUnlocked = unlockAll || unlockedIds.contains(folder),
+                isSelected = folder == selectedId,
+                drawable = drawable
             )
         }
     }
@@ -216,10 +260,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private fun showUnlockCharacterDialog(item: CharacterModel) {
         val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
         dialog.onYesClick = {
-            val pref = SharePreferenceHelper(this)
-            val unlocked = pref.getUnlockedCharacters()
+            val unlocked = sharePreference.getUnlockedCharacters()
             unlocked.add(item.id)
-            pref.setUnlockedCharacters(unlocked)
+            sharePreference.setUnlockedCharacters(unlocked)
             characterAdapter.submitList(characterAdapter.currentList.map {
                 if (it.id == item.id) it.copy(isUnlocked = true) else it
             })
@@ -232,49 +275,47 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun setupBackgroundPanel() {
         binding.rcvBackgroundPanel.adapter = backgroundAdapter
-        backgroundAdapter.submitList(loadBackgrounds())
         backgroundAdapter.onItemClick = { clickedItem ->
             when {
                 !clickedItem.isUnlocked -> showUnlockBackgroundDialog(clickedItem)
                 !clickedItem.isSelected -> {
-                    val pref = SharePreferenceHelper(this)
-                    pref.setSelectedBackground(clickedItem.id)
+                    sharePreference.setSelectedBackground(clickedItem.id)
                     backgroundAdapter.submitList(backgroundAdapter.currentList.map {
-                        it.copy(
-                            isSelected = it.id == clickedItem.id
-                        )
+                        it.copy(isSelected = it.id == clickedItem.id)
                     })
-                    binding.btnBackground.setFailureListener { }
-                    binding.btnBackground.setAnimation(clickedItem.jsonPath)
+                    lottieCache[clickedItem.jsonPath]?.let { binding.btnBackground.setComposition(it) }
+                        ?: binding.btnBackground.setAnimation(clickedItem.jsonPath)
                     binding.btnBackground.playAnimation()
                     binding.panelBackground.visibility = View.GONE
                 }
-
                 else -> binding.panelBackground.visibility = View.GONE
             }
         }
     }
 
     private fun loadBackgrounds(): List<BackgroundItemModel> {
-        val pref = SharePreferenceHelper(this)
-        val unlockedIds = pref.getUnlockedBackgrounds()
-        var selectedId = pref.getSelectedBackground()
+        val unlockedIds = sharePreference.getUnlockedBackgrounds()
+        var selectedId = sharePreference.getSelectedBackground()
         val files = assets.list("bg") ?: return emptyList()
         val validFiles = files.filter { it.endsWith(".json") }
         if (validFiles.isNotEmpty()) {
             val firstId = validFiles.first().removeSuffix(".json")
             if (unlockedIds.isEmpty()) {
-                unlockedIds.add(firstId); pref.setUnlockedBackgrounds(unlockedIds)
+                unlockedIds.add(firstId); sharePreference.setUnlockedBackgrounds(unlockedIds)
             }
             if (selectedId.isEmpty()) {
-                selectedId = firstId; pref.setSelectedBackground(selectedId)
+                selectedId = firstId; sharePreference.setSelectedBackground(selectedId)
             }
         }
+        val unlockAll = sharePreference.getUnlockAll()
         return validFiles.map { file ->
             val id = file.removeSuffix(".json")
+            val resId = resources.getIdentifier("bg_$id", "drawable", packageName)
             BackgroundItemModel(
                 id = id, jsonPath = "bg/$file",
-                isUnlocked = unlockedIds.contains(id), isSelected = id == selectedId
+                isUnlocked = unlockAll || unlockedIds.contains(id),
+                isSelected = id == selectedId,
+                previewResId = resId
             )
         }
     }
@@ -282,10 +323,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private fun showUnlockBackgroundDialog(item: BackgroundItemModel) {
         val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
         dialog.onYesClick = {
-            val pref = SharePreferenceHelper(this)
-            val unlocked = pref.getUnlockedBackgrounds()
+            val unlocked = sharePreference.getUnlockedBackgrounds()
             unlocked.add(item.id)
-            pref.setUnlockedBackgrounds(unlocked)
+            sharePreference.setUnlockedBackgrounds(unlocked)
             backgroundAdapter.submitList(backgroundAdapter.currentList.map {
                 if (it.id == item.id) it.copy(isUnlocked = true) else it
             })
@@ -298,18 +338,17 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun setupInstrumentPanel() {
         binding.rcvInstrumentPanel.adapter = instrumentAdapter
-        instrumentAdapter.submitList(loadInstruments())
         instrumentAdapter.onItemClick = { clickedItem ->
             when {
+                !clickedItem.isAvailable -> Unit
                 !clickedItem.isUnlocked -> showUnlockInstrumentDialog(clickedItem)
                 !clickedItem.isSelected -> {
-                    val pref = SharePreferenceHelper(this)
-                    pref.setSelectedInstrument(clickedItem.id)
+                    sharePreference.setSelectedInstrument(clickedItem.id)
                     instrumentAdapter.submitList(instrumentAdapter.currentList.map {
                         it.copy(isSelected = it.id == clickedItem.id)
                     })
                     currentInstrumentId = clickedItem.id
-                    soundPlayer.load(clickedItem.id, clickedItem.noteCount)
+                    soundPlayer.load(clickedItem.id)
                     showDefault()
                     if (clickedItem.noteCount == 8) {
                         binding.notes8.visibility = View.VISIBLE
@@ -326,35 +365,39 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun loadInstruments(): List<InstrumentModel> {
-        val pref = SharePreferenceHelper(this)
-        val unlockedIds = pref.getUnlockedInstruments()
-        var selectedId = pref.getSelectedInstrument()
+        val unlockedIds = sharePreference.getUnlockedInstruments()
+        var selectedId = sharePreference.getSelectedInstrument()
         val folders = assets.list("instrument/let_play") ?: return emptyList()
         val validFolders = folders.filter {
-            assets.list("instrument/let_play/$it")?.contains("nav.png") == true &&
+            assets.list("instrument/let_play/$it")?.contains("nav.png") == true
+        }
+        val availableFolders = validFolders.filter {
             assets.list("skin/$currentSkinId/$it") != null
         }
-        if (validFolders.isNotEmpty()) {
-            val firstId = validFolders.first()
+        if (availableFolders.isNotEmpty()) {
+            val firstId = availableFolders.first()
             if (unlockedIds.isEmpty()) {
-                unlockedIds.add(firstId); pref.setUnlockedInstruments(unlockedIds)
+                unlockedIds.add(firstId); sharePreference.setUnlockedInstruments(unlockedIds)
             }
-            if (selectedId.isEmpty() || !validFolders.contains(selectedId)) {
-                selectedId = firstId; pref.setSelectedInstrument(selectedId)
+            if (selectedId.isEmpty() || !availableFolders.contains(selectedId)) {
+                selectedId = firstId; sharePreference.setSelectedInstrument(selectedId)
             }
         }
-        if (currentInstrumentId !in validFolders) {
-            currentInstrumentId = validFolders.firstOrNull() ?: currentInstrumentId
+        if (currentInstrumentId !in availableFolders) {
+            currentInstrumentId = availableFolders.firstOrNull() ?: currentInstrumentId
         }
+        val unlockAll = sharePreference.getUnlockAll()
         return validFolders.map { folder ->
+            val navPath = "instrument/let_play/$folder/nav.png"
             val files = assets.list("instrument/let_play/$folder") ?: emptyArray()
             val noteCount = files.count { it.endsWith(".mp3") }
+            val drawable = try { assets.open(navPath).use { Drawable.createFromStream(it, null) } } catch (e: Exception) { null }
             InstrumentModel(
-                id = folder,
-                navPath = "instrument/let_play/$folder/nav.png",
-                noteCount = noteCount,
-                isUnlocked = unlockedIds.contains(folder),
-                isSelected = folder == selectedId
+                id = folder, navPath = navPath, noteCount = noteCount,
+                isUnlocked = unlockAll || unlockedIds.contains(folder),
+                isSelected = folder == selectedId,
+                isAvailable = availableFolders.contains(folder),
+                drawable = drawable
             )
         }
     }
@@ -362,10 +405,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private fun showUnlockInstrumentDialog(item: InstrumentModel) {
         val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
         dialog.onYesClick = {
-            val pref = SharePreferenceHelper(this)
-            val unlocked = pref.getUnlockedInstruments()
+            val unlocked = sharePreference.getUnlockedInstruments()
             unlocked.add(item.id)
-            pref.setUnlockedInstruments(unlocked)
+            sharePreference.setUnlockedInstruments(unlocked)
             instrumentAdapter.submitList(instrumentAdapter.currentList.map {
                 if (it.id == item.id) it.copy(isUnlocked = true) else it
             })
@@ -387,25 +429,87 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
         if (songs.isEmpty()) return
 
+        val density = resources.displayMetrics.scaledDensity
+
+        fun applyDescriptionSize(isSmall: Boolean) {
+            if (isSmall) {
+                binding.tvDescription.textSize = 12f
+                binding.tvDescription.setLineSpacing(0f, 0.85f)
+            } else {
+                binding.tvDescription.textSize = 16f
+                binding.tvDescription.setLineSpacing(0f, 1f)
+            }
+            val spSize = binding.tvDescription.textSize / resources.displayMetrics.scaledDensity
+            android.util.Log.d("tvDesc", "applySize: isSmall=$isSmall → textSize=${spSize}sp")
+        }
+
+        fun needsSmallSize(text: String, width: Int): Boolean {
+            val paint = TextPaint(binding.tvDescription.paint)
+            paint.textSize = 16f * density
+            val lineCount = StaticLayout.Builder
+                .obtain(text, 0, text.length, paint, width.coerceAtLeast(1))
+                .setLineSpacing(0f, 1f)
+                .build()
+                .lineCount
+            val result = lineCount >= 3
+            android.util.Log.d("tvDesc", "needsSmallSize: song=\"${songs[currentSongIndex].name}\" measuredWidth=$width staticLineCount=$lineCount → isSmall=$result")
+            return result
+        }
+
         fun showSong(index: Int) {
+            val notes = songs[index].notes
             binding.songName.text = songs[index].name
-            binding.tvDescription.text = songs[index].notes
-            binding.btnPrevious.isEnabled = index > 0
-            binding.btnPrevious.alpha = if (index > 0) 1f else 0.3f
-            binding.btnNext.isEnabled = index < songs.size - 1
-            binding.btnNext.alpha = if (index < songs.size - 1) 1f else 0.3f
+
+            val innerWidth = (binding.tvDescription.width
+                - binding.tvDescription.paddingLeft
+                - binding.tvDescription.paddingRight)
+                .takeIf { it > 0 }
+
+            android.util.Log.d("tvDesc", "showSong: song=\"${songs[index].name}\" viewWidth=${binding.tvDescription.width} paddingL=${binding.tvDescription.paddingLeft} paddingR=${binding.tvDescription.paddingRight} innerWidth=$innerWidth")
+
+            if (innerWidth != null) {
+                applyDescriptionSize(needsSmallSize(notes, innerWidth))
+                binding.tvDescription.text = notes
+                binding.tvDescription.post {
+                    android.util.Log.d("tvDesc", "post-layout: song=\"${songs[index].name}\" actualLineCount=${binding.tvDescription.lineCount} viewWidth=${binding.tvDescription.width}")
+                }
+            } else {
+                binding.tvDescription.text = notes
+                binding.tvDescription.post {
+                    val w = binding.tvDescription.width - binding.tvDescription.paddingLeft - binding.tvDescription.paddingRight
+                    applyDescriptionSize(needsSmallSize(notes, w))
+                    android.util.Log.d("tvDesc", "post-layout: song=\"${songs[index].name}\" actualLineCount=${binding.tvDescription.lineCount} viewWidth=${binding.tvDescription.width}")
+                }
+            }
         }
 
         showSong(currentSongIndex)
 
-        binding.btnPrevious.setOnClickListener {
-            currentSongIndex--
-            showSong(currentSongIndex)
+        fun setupRepeatButton(button: View, step: Int) {
+            val repeatRunnable = object : Runnable {
+                override fun run() {
+                    currentSongIndex = (currentSongIndex + step + songs.size) % songs.size
+                    showSong(currentSongIndex)
+                    handler.postDelayed(this, 200L)
+                }
+            }
+            button.setOnTouchListener { _, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        currentSongIndex = (currentSongIndex + step + songs.size) % songs.size
+                        showSong(currentSongIndex)
+                        handler.postDelayed(repeatRunnable, 400L)
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        handler.removeCallbacks(repeatRunnable)
+                    }
+                }
+                true
+            }
         }
-        binding.btnNext.setOnClickListener {
-            currentSongIndex++
-            showSong(currentSongIndex)
-        }
+
+        setupRepeatButton(binding.btnPrevious, -1)
+        setupRepeatButton(binding.btnNext, +1)
     }
 
     override fun onDestroy() {
