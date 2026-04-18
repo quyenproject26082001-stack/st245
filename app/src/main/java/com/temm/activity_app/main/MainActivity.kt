@@ -53,7 +53,7 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
 
     override fun viewListener() {
         binding.apply {
-            actionBar.btnActionBarRightText.setOnSingleClick { startIntentRightToLeft(SettingsActivity::class.java) }
+            actionBar.btnActionBarRight1.setOnSingleClick { startIntentRightToLeft(SettingsActivity::class.java) }
 
             btnPlayHome.setOnSingleClick {
 
@@ -75,10 +75,11 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
 
     override fun initActionBar() {
         binding.actionBar.apply {
-            btnActionBarRightText.setBackgroundResource(R.drawable.ic_settings)
+            btnActionBarRight1.setBackgroundResource(R.drawable.ic_settings)
             tvRightText.setText(R.string.settings)
             tvCenter.invisible()
             tvRightText.select()
+            btnActionBarRight1.visible()
             btnActionBarRightText.visible()
         }
     }

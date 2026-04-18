@@ -12,8 +12,10 @@ import com.temm.databinding.ItemInstrumentBinding
 
 class InstrumentAdapter : ListAdapter<InstrumentModel, InstrumentAdapter.ViewHolder>(DiffCallback()) {
 
+
     // Fragment uses this lambda to listen for item clicks
     var onItemClick: ((InstrumentModel) -> Unit) = {}
+
 
     // ViewHolder holds the binding for each item in the list
     inner class ViewHolder(val binding: ItemInstrumentBinding) : RecyclerView.ViewHolder(binding.root)
