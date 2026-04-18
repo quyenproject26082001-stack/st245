@@ -11,6 +11,7 @@ object SharePreferenceKey {
     const val LAST_PLAYED_SONG_KEY = "last_played_song_id"
     const val UNLOCKED_CHARACTERS_KEY = "unlocked_characters"
     const val UNLOCKED_BACKGROUNDS_KEY = "unlocked_backgrounds"
+    const val UNLOCKED_INSTRUMENTS_KEY = "unlocked_instruments"
     const val SELECTED_CHARACTER_KEY = "selected_character"
     const val SELECTED_BACKGROUND_KEY = "selected_background"
 }

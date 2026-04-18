@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginVertical="8dp"
+
     android:layout_marginHorizontal="4dp">
 
     <!-- Inner layout: 0dp/0dp + ratio works here because parent IS a ConstraintLayout -->
@@ -37,6 +39,7 @@
             app:layout_constraintDimensionRatio="88:32"
             android:background="@drawable/bg_use_character"
             android:text="@string/use"
+            android:layout_marginHorizontal="8dp"
             android:textColor="#FFFFFF"
             android:fontFamily="@font/cherrybombone_regular"
             android:gravity="center" />

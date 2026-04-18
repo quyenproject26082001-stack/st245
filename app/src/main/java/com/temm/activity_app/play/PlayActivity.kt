@@ -6,6 +6,8 @@ import android.os.Looper
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import com.temm.R
+import com.temm.core.extensions.animateScaleEffect
+import com.temm.core.helper.NoteIconManager
 import com.temm.activity_app.background.BackgroundAdapter
 import com.temm.activity_app.character.CharacterAdapter
 import com.temm.activity_app.instrument.InstrumentAdapter
@@ -30,6 +32,11 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private val backgroundAdapter = BackgroundAdapter()
     private val instrumentAdapter = InstrumentAdapter()
 
+    private lateinit var noteIconManager: NoteIconManager
+    private data class Song(val name: String, val notes: String)
+    private var songs: List<Song> = emptyList()
+    private var currentSongIndex = 0
+
     override fun setViewBinding() = ActivityPlayBinding.inflate(layoutInflater)
 
     override fun initView() {
@@ -43,10 +50,12 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         binding.btnBackground.setAnimation("bg/1.json")
         binding.btnBackground.playAnimation()
 
+        noteIconManager = NoteIconManager(this, binding.noteOverlay)
+        noteIconManager.setRandomSpawnPoints(5,-150f..150f, -10f..150f) // pre-generate 5 random spawn points within a 300x300 area
         setupCharacterPanel()
         setupBackgroundPanel()
         setupInstrumentPanel()
-
+        setupSongGuide()
     }
 
     override fun initActionBar() {}
@@ -90,42 +99,35 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     // Wire each note button to its note index + character animation
     private fun setupNoteButtons() {
         // Buttons 1–4: play sound + flash left.png then return to default
-        binding.btn1.setOnClickListener { soundPlayer.play(1); showLeft() }
-        binding.btn2.setOnClickListener { soundPlayer.play(2); showLeft() }
-        binding.btn3.setOnClickListener { soundPlayer.play(3); showLeft() }
-        binding.btn4.setOnClickListener { soundPlayer.play(4); showLeft() }
+        binding.btn1.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft() }
+        binding.btn2.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showLeft() }
+        binding.btn3.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(3); showLeft() }
+        binding.btn4.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(4); showLeft() }
 
         // Buttons 5–8: play sound + flash right.png then return to default
-        binding.btn5.setOnClickListener { soundPlayer.play(5); showRight() }
-        binding.btn6.setOnClickListener { soundPlayer.play(6); showRight() }
-        binding.btn7.setOnClickListener { soundPlayer.play(7); showRight() }
-        binding.btn8.setOnClickListener { soundPlayer.play(8); showRight() }
+        binding.btn5.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(5); showRight() }
+        binding.btn6.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(6); showRight() }
+        binding.btn7.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(7); showRight() }
+        binding.btn8.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(8); showRight() }
 
         // 2-note buttons
-        binding.btnLeft.setOnClickListener { soundPlayer.play(1); showLeft() }
-        binding.btnRight.setOnClickListener { soundPlayer.play(2); showRight() }
+        binding.btnLeft.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft() }
+        binding.btnRight.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showRight() }
     }
 
-    // Show left.png briefly, then return to default after 250ms
-    private fun showLeft() {
-        loadCharacterImage("left")
-        scheduleReset()
-    }
-
-    // Show right.png briefly, then return to default after 250ms
-    private fun showRight() {
-        loadCharacterImage("right")
-        scheduleReset()
-    }
+    private fun showLeft() = showAction("left")
+    private fun showRight() = showAction("right")
 
     private fun showDefault() {
         loadCharacterImage("default")
     }
 
-    // Cancel any pending reset then schedule a new one
-    private fun scheduleReset() {
+    // default → action → default so every tap is visually distinct even when clicked rapidly
+    private fun showAction(type: String) {
         handler.removeCallbacksAndMessages(null)
-        handler.postDelayed({ showDefault() }, 250)
+        showDefault()
+        handler.postDelayed({ loadCharacterImage(type) }, 80)
+        handler.postDelayed({ showDefault() }, 330)
     }
 
     // Load the given image type (default / left / right) from the current skin + instrument folder
@@ -177,6 +179,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                         )
                     })
                     currentSkinId = clickedItem.id
+                    instrumentAdapter.submitList(loadInstruments())
                     showDefault()
                     binding.panelCharacter.visibility = View.GONE
                 }
@@ -297,39 +300,118 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         binding.rcvInstrumentPanel.adapter = instrumentAdapter
         instrumentAdapter.submitList(loadInstruments())
         instrumentAdapter.onItemClick = { clickedItem ->
-            instrumentAdapter.submitList(instrumentAdapter.currentList.map { it.copy(isSelected = it.id == clickedItem.id) })
-            currentInstrumentId = clickedItem.id
-            soundPlayer.load(clickedItem.id, clickedItem.noteCount)
-            showDefault()
-            if (clickedItem.noteCount == 8) {
-                binding.notes8.visibility = View.VISIBLE
-                binding.notes2.visibility = View.GONE
-            } else {
-                binding.notes2.visibility = View.VISIBLE
-                binding.notes8.visibility = View.GONE
+            when {
+                !clickedItem.isUnlocked -> showUnlockInstrumentDialog(clickedItem)
+                !clickedItem.isSelected -> {
+                    val pref = SharePreferenceHelper(this)
+                    pref.setSelectedInstrument(clickedItem.id)
+                    instrumentAdapter.submitList(instrumentAdapter.currentList.map {
+                        it.copy(isSelected = it.id == clickedItem.id)
+                    })
+                    currentInstrumentId = clickedItem.id
+                    soundPlayer.load(clickedItem.id, clickedItem.noteCount)
+                    showDefault()
+                    if (clickedItem.noteCount == 8) {
+                        binding.notes8.visibility = View.VISIBLE
+                        binding.notes2.visibility = View.GONE
+                    } else {
+                        binding.notes2.visibility = View.VISIBLE
+                        binding.notes8.visibility = View.GONE
+                    }
+                    binding.panelInstrument.visibility = View.GONE
+                }
+                else -> binding.panelInstrument.visibility = View.GONE
             }
-            binding.panelInstrument.visibility = View.GONE
         }
     }
 
     private fun loadInstruments(): List<InstrumentModel> {
+        val pref = SharePreferenceHelper(this)
+        val unlockedIds = pref.getUnlockedInstruments()
+        var selectedId = pref.getSelectedInstrument()
         val folders = assets.list("instrument/let_play") ?: return emptyList()
-        return folders
-            .filter { assets.list("instrument/let_play/$it")?.contains("nav.png") == true }
-            .map { folder ->
-                val files = assets.list("instrument/let_play/$folder") ?: emptyArray()
-                val noteCount = files.count { it.endsWith(".mp3") }
-                InstrumentModel(
-                    id = folder,
-                    navPath = "instrument/let_play/$folder/nav.png",
-                    noteCount = noteCount
-                )
+        val validFolders = folders.filter {
+            assets.list("instrument/let_play/$it")?.contains("nav.png") == true &&
+            assets.list("skin/$currentSkinId/$it") != null
+        }
+        if (validFolders.isNotEmpty()) {
+            val firstId = validFolders.first()
+            if (unlockedIds.isEmpty()) {
+                unlockedIds.add(firstId); pref.setUnlockedInstruments(unlockedIds)
             }
+            if (selectedId.isEmpty() || !validFolders.contains(selectedId)) {
+                selectedId = firstId; pref.setSelectedInstrument(selectedId)
+            }
+        }
+        if (currentInstrumentId !in validFolders) {
+            currentInstrumentId = validFolders.firstOrNull() ?: currentInstrumentId
+        }
+        return validFolders.map { folder ->
+            val files = assets.list("instrument/let_play/$folder") ?: emptyArray()
+            val noteCount = files.count { it.endsWith(".mp3") }
+            InstrumentModel(
+                id = folder,
+                navPath = "instrument/let_play/$folder/nav.png",
+                noteCount = noteCount,
+                isUnlocked = unlockedIds.contains(folder),
+                isSelected = folder == selectedId
+            )
+        }
+    }
+
+    private fun showUnlockInstrumentDialog(item: InstrumentModel) {
+        val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
+        dialog.onYesClick = {
+            val pref = SharePreferenceHelper(this)
+            val unlocked = pref.getUnlockedInstruments()
+            unlocked.add(item.id)
+            pref.setUnlockedInstruments(unlocked)
+            instrumentAdapter.submitList(instrumentAdapter.currentList.map {
+                if (it.id == item.id) it.copy(isUnlocked = true) else it
+            })
+            dialog.dismiss()
+        }
+        dialog.onNoClick = { dialog.dismiss() }
+        dialog.onDismissClick = { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun setupSongGuide() {
+        songs = assets.list("song")
+            ?.filter { it.endsWith(".txt") }
+            ?.map { fileName ->
+                val name = fileName.removeSuffix(".txt")
+                val notes = assets.open("song/$fileName").bufferedReader().readText().trim()
+                Song(name, notes)
+            } ?: emptyList()
+
+        if (songs.isEmpty()) return
+
+        fun showSong(index: Int) {
+            binding.songName.text = songs[index].name
+            binding.tvDescription.text = songs[index].notes
+            binding.btnPrevious.isEnabled = index > 0
+            binding.btnPrevious.alpha = if (index > 0) 1f else 0.3f
+            binding.btnNext.isEnabled = index < songs.size - 1
+            binding.btnNext.alpha = if (index < songs.size - 1) 1f else 0.3f
+        }
+
+        showSong(currentSongIndex)
+
+        binding.btnPrevious.setOnClickListener {
+            currentSongIndex--
+            showSong(currentSongIndex)
+        }
+        binding.btnNext.setOnClickListener {
+            currentSongIndex++
+            showSong(currentSongIndex)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
+        noteIconManager.hideAllIcons()
         soundPlayer.release()
     }
 }

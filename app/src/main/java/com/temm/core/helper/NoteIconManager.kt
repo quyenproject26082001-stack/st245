@@ -20,6 +20,51 @@ class NoteIconManager(
     private val context: Context,
     private val overlayContainer: FrameLayout
 ) {
+    // Multiple spawn points — each is (offsetX, offsetY) from button center in dp
+    private val _spawnPoints = mutableListOf<Pair<Float, Float>>()
+    val spawnPoints: List<Pair<Float, Float>> get() = _spawnPoints
+
+    fun addSpawnPoint(offsetX: Float, offsetY: Float) {
+        _spawnPoints.add(Pair(offsetX, offsetY))
+    }
+
+    fun clearSpawnPoints() {
+        _spawnPoints.clear()
+    }
+
+    // When true, spawn points are re-randomized on every tap
+    var randomizeOnTap: Boolean = false
+    private var randomCount: Int = 5
+    private var randomXRange: ClosedFloatingPointRange<Float> = -100f..100f
+    private var randomYRange: ClosedFloatingPointRange<Float> = -100f..100f
+
+    // Generate `count` random spawn points within the given x/y dp range
+    fun setRandomSpawnPoints(count: Int, xRange: ClosedFloatingPointRange<Float> = -100f..100f, yRange: ClosedFloatingPointRange<Float> = -100f..100f) {
+        randomCount = count
+        randomXRange = xRange
+        randomYRange = yRange
+        randomizeOnTap = true
+        applyRandomSpawnPoints()
+    }
+
+    private fun applyRandomSpawnPoints() {
+        _spawnPoints.clear()
+        repeat(randomCount) {
+            val x = randomXRange.start + Random.nextFloat() * (randomXRange.endInclusive - randomXRange.start)
+            val y = randomYRange.start + Random.nextFloat() * (randomYRange.endInclusive - randomYRange.start)
+            _spawnPoints.add(Pair(x, y))
+        }
+    }
+
+    // Number of icons spawned per point (min, max) — e.g. Pair(2, 5)
+    var iconCountRange: Pair<Int, Int> = Pair(1, 1)
+
+    // Direction range in degrees — icons fly within [angleFrom, angleTo]
+    // 0° = right, 90° = down, 180° = left, 270° = up
+    // Default: full 360° spread
+    var angleFrom: Float = 180f
+    var angleTo: Float = 360f
+
     // Track all active icons currently animating
     private val activeIcons = mutableListOf<ImageView>()
 
@@ -38,30 +83,21 @@ class NoteIconManager(
      */
     fun showIcon(pointerId: Int, button: ImageView) {
         // Check if we have too many active icons
-        if (activeIcons.size >= MAX_ACTIVE_ICONS) {
-            Log.d(TAG, "Too many active icons (${activeIcons.size}), skipping")
-            return
-        }
+        if (activeIcons.size >= MAX_ACTIVE_ICONS) return
+        if (randomizeOnTap) applyRandomSpawnPoints()
+        if (_spawnPoints.isEmpty()) return
 
-        // Randomly generate 2-5 icons
-        val iconCount = Random.nextInt(2, 6)
-
-        // Create random base angle for rotation variety
-        val baseAngle = (System.nanoTime() % 360000).toFloat() / 1000f
-
-        // Spread icons evenly in full 360° circle
-        val angleSpread = 360f / iconCount
-
-        Log.d(TAG, "Generating $iconCount icons bursting from center, baseAngle=$baseAngle, spread=$angleSpread")
-
-        repeat(iconCount) { index ->
-            // Each icon spread evenly around full circle with small random offset
-            val randomOffset = (Random.nextFloat() * 20f - 10f)
-            val angle = (baseAngle + (index * angleSpread) + randomOffset) % 360f
-
-            Log.d(TAG, "Icon $index: angle=$angle (base=$baseAngle + index*spread=${index * angleSpread} + offset=$randomOffset)")
-
-            createAndAnimateIcon(button, angle)
+        // Fire all spawn points at the same time
+        spawnPoints.forEach { spawn ->
+            val iconCount = Random.nextInt(iconCountRange.first, iconCountRange.second + 1)
+            val range = if (angleTo > angleFrom) angleTo - angleFrom else 360f
+            val angleSpread = range / iconCount
+            val baseAngle = angleFrom + (Random.nextFloat() * angleSpread)
+            repeat(iconCount) { index ->
+                val randomOffset = (Random.nextFloat() * 10f - 5f)
+                val angle = (baseAngle + (index * angleSpread) + randomOffset) % 360f
+                createAndAnimateIcon(button, spawn, angle)
+            }
         }
     }
 
@@ -87,7 +123,7 @@ class NoteIconManager(
     /**
      * Create and animate a single flying icon at specified angle
      */
-    private fun createAndAnimateIcon(button: ImageView, angle: Float) {
+    private fun createAndAnimateIcon(button: ImageView, spawn: Pair<Float, Float>, angle: Float) {
         // Get or create icon from pool
         val icon = if (iconPool.isNotEmpty()) {
             iconPool.removeAt(iconPool.size - 1)
@@ -107,9 +143,9 @@ class NoteIconManager(
         val relativeX = buttonLocation[0] - containerLocation[0]
         val relativeY = buttonLocation[1] - containerLocation[1]
 
-        // Starting position (center of button)
-        val startX = relativeX + (button.width / 2f) - (iconSizePx / 2f)
-        val startY = relativeY + (button.height / 2f) - (iconSizePx / 2f)
+        val density = context.resources.displayMetrics.density
+        val startX = relativeX + (button.width / 2f) - (iconSizePx / 2f) + (spawn.first * density)
+        val startY = relativeY + (button.height / 2f) - (iconSizePx / 2f) + (spawn.second * density)
 
         // Use the provided angle
         val angleRadians = Math.toRadians(angle.toDouble())

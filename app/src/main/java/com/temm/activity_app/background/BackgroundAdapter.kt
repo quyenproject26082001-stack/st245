@@ -26,10 +26,9 @@ class BackgroundAdapter : ListAdapter<BackgroundItemModel, BackgroundAdapter.Vie
     // Binds data to the ViewHolder at the given position
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position) // use getItem() — ListAdapter owns the list
-        // Lottie 6.x throws by default on parse failure — override to prevent crash
-        holder.binding.lottiePreview.setFailureListener { /* ignore parse errors */ }
-        holder.binding.lottiePreview.setAnimation(item.jsonPath)
-        holder.binding.lottiePreview.playAnimation() // lottie_autoPlay in XML only triggers at inflation, not after setAnimation()
+        val ctx = holder.itemView.context
+        val resId = ctx.resources.getIdentifier("bg_${item.id}", "drawable", ctx.packageName)
+        if (resId != 0) holder.binding.ivPreview.setImageResource(resId)
 
         // Three states: unlock (locked) → use (unlocked, not active) → used (currently active)
         when {

@@ -170,6 +170,17 @@ class SharePreferenceHelper(val context: Context) {
         preferences.edit().putString(SharePreferenceKey.UNLOCKED_BACKGROUNDS_KEY, Gson().toJson(ids)).apply()
     }
 
+    // Unlocked Instruments
+    fun getUnlockedInstruments(): MutableSet<String> {
+        val json = preferences.getString(SharePreferenceKey.UNLOCKED_INSTRUMENTS_KEY, "[]")
+        val type = object : TypeToken<MutableSet<String>>(){}.type
+        return Gson().fromJson(json, type)
+    }
+
+    fun setUnlockedInstruments(ids: MutableSet<String>) {
+        preferences.edit().putString(SharePreferenceKey.UNLOCKED_INSTRUMENTS_KEY, Gson().toJson(ids)).apply()
+    }
+
     // Selected Character
     fun getSelectedCharacter(): String {
         return preferences.getString(SharePreferenceKey.SELECTED_CHARACTER_KEY, "") ?: ""
