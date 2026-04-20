@@ -1,4 +1,4 @@
-package com.temm.ui.language
+package com.temm.activity_app.language
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

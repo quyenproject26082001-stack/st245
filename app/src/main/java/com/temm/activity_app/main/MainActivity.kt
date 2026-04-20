@@ -3,7 +3,6 @@ package com.temm.activity_app.main
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.lifecycleScope
@@ -47,7 +46,6 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
     private fun setupTextStroke() {
         // Enable marquee effect for long text
         binding.tv1.isSelected = true
-        binding.tv1.isSelected = true
         binding.tv2.isSelected = true
     }
 
@@ -56,21 +54,11 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
             actionBar.btnActionBarRight1.setOnSingleClick { startIntentRightToLeft(SettingsActivity::class.java) }
 
             btnPlayHome.setOnSingleClick {
-
-                startIntentRightToLeft( PlayActivity::class.java)
-                Log.d("MainActivity", "btnPlayHome clicked - Opening PlayActivity")
-            }
-
-            btnSecret.setOnSingleClick {
-                Log.d("MainActivity", "btnSecret clicked - Opening MyRecordActivity")
+                startIntentRightToLeft(PlayActivity::class.java)
             }
 
 
         }
-    }
-
-    override fun initText() {
-        super.initText()
     }
 
     override fun initActionBar() {

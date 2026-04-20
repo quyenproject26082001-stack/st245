@@ -164,14 +164,6 @@ class RatioFrameLayout @JvmOverloads constructor(
     }
 
 
-    private fun createStrokeDrawable(focused: Boolean): GradientDrawable {
-        return GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            setColor(Color.TRANSPARENT)
-            if (focused) setStroke(6, Color.RED) else setStroke(0, Color.TRANSPARENT)
-        }
-    }
-
     private fun parseRatio(ratioStr: String): Float {
         return if (ratioStr.contains(":")) {
             val parts = ratioStr.split(":")

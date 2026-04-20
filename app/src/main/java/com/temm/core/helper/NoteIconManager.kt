@@ -174,11 +174,6 @@ class NoteIconManager(
         icon.scaleY = 0.5f
         icon.rotation = Random.nextFloat() * 360f
 
-        Log.d(
-            TAG,
-            "Icon: angle=$angle°, distance=$flyDistance, deltaX=$deltaX, deltaY=$deltaY, start=($startX,$startY)"
-        )
-
         // Slow flight for children (4-6 seconds)
         val flightDuration = Random.nextLong(4000, 6001)
 
@@ -225,7 +220,6 @@ class NoteIconManager(
             overlayContainer.removeView(icon)
         }
 
-        Log.d(TAG, "Icon removed, active count: ${activeIcons.size}")
     }
 
     /**

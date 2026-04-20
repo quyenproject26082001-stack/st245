@@ -7,7 +7,7 @@ import android.media.SoundPool
 class InstrumentSoundPlayer(private val context: Context) {
 
     private val soundPool = SoundPool.Builder()
-        .setMaxStreams(10) // allow up to 10 simultaneous sounds (multi-touch friendly)
+        .setMaxStreams(8) // allow up to 10 simultaneous sounds (multi-touch friendly)
         .setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)

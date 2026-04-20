@@ -6,9 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.net.Uri
-import android.util.Log
 import android.view.View
-import androidx.core.graphics.createBitmap
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 
@@ -21,7 +19,6 @@ object BitmapHelper {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.e("nbhieu", "uriToBitmap: ${e.message}")
             null
         }
     }
@@ -61,15 +58,4 @@ object BitmapHelper {
         return bitmaps
     }
 
-    @Throws(OutOfMemoryError::class)
-    fun createBimapFromView(view: View): Bitmap {
-        try {
-            val output = createBitmap(view.width, view.height)
-            val canvas = Canvas(output)
-            view.draw(canvas)
-            return output
-        } catch (error: OutOfMemoryError) {
-            throw error
-        }
-    }
 }

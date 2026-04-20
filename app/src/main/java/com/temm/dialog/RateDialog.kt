@@ -20,8 +20,7 @@ class RateDialog(context: Activity) : BaseDialog<DialogRateBinding>(context, Gra
 
 
 
-    override fun initView() {
-    }
+    override fun initView() {}
 
     override fun initAction() {
         binding.btnCancel.setOnClickListener { onCancel?.invoke() }
@@ -72,9 +71,7 @@ class RateDialog(context: Activity) : BaseDialog<DialogRateBinding>(context, Gra
         }
     }
 
-    override fun onDismissListener() {
-
-    }
+    override fun onDismissListener() {}
 
     fun setView(tv1: Int, tv2: Int, img: Int) {
         binding.tv1.text = localizedContext.strings(tv1)

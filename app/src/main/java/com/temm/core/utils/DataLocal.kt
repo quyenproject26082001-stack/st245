@@ -2,13 +2,9 @@ package com.temm.core.utils
 
 import androidx.lifecycle.MutableLiveData
 import com.temm.R
-import com.temm.core.custom.layout.LayoutPresets
 import com.temm.data.model.IntroModel
 import com.temm.data.model.LanguageModel
-import com.temm.data.model.custom.CustomizeModel
 import com.facebook.shimmer.Shimmer
-import com.temm.core.utils.key.NavigationLayerKey
-import com.temm.data.model.custom.NavigationModel
 
 object DataLocal {
     val shimmer =
@@ -16,10 +12,7 @@ object DataLocal {
             .setDirection(Shimmer.Direction.LEFT_TO_RIGHT).setAutoStart(true).build()
 
     var lastClickTime = 0L
-    var currentDate = ""
     var isConnectInternet = MutableLiveData<Boolean>()
-    var isFailBaseURL = false
-    var isCallDataAlready = false
 
     fun getLanguageList(): ArrayList<LanguageModel> {
         return arrayListOf(

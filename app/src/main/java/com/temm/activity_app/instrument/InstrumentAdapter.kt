@@ -28,11 +28,6 @@ class InstrumentAdapter : RecyclerView.Adapter<InstrumentAdapter.ViewHolder>() {
         val item = items[position]
         item.drawable?.let { holder.binding.ivCharacter.setImageDrawable(it) }
         when {
-            !item.isAvailable -> {
-                holder.binding.tvUse.setText(R.string.no_skin)
-                holder.binding.tvUse.setBackgroundResource(R.drawable.bg_unavailable_instrument)
-                holder.binding.root.alpha = 0.5f
-            }
             !item.isUnlocked -> {
                 holder.binding.tvUse.setText(R.string.unlock)
                 holder.binding.tvUse.setBackgroundResource(R.drawable.bg_unlock_character)
@@ -59,8 +54,7 @@ class InstrumentAdapter : RecyclerView.Adapter<InstrumentAdapter.ViewHolder>() {
             override fun areItemsTheSame(op: Int, np: Int) = items[op].id == newList[np].id
             override fun areContentsTheSame(op: Int, np: Int) =
                 items[op].isUnlocked == newList[np].isUnlocked &&
-                items[op].isSelected == newList[np].isSelected &&
-                items[op].isAvailable == newList[np].isAvailable
+                items[op].isSelected == newList[np].isSelected
         })
         items.clear()
         items.addAll(newList)

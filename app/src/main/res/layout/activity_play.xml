@@ -349,6 +349,20 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+    <!-- Transparent full-screen overlay: intercepts taps outside panels to dismiss them -->
+    <View
+        android:id="@+id/panelScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Character panel: visible from bottom of btnCharacter to bottom of parent -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/panelCharacter"

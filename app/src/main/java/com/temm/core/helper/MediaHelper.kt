@@ -119,7 +119,6 @@ object MediaHelper {
             resolver.update(videoUri, contentValues, null, null)
             HandleState.SUCCESS
         } catch (e: Exception) {
-            Log.e("nbhieu", "downloadUsingMediaStore: ${e.message}")
             HandleState.FAIL
         }
     }

@@ -12,11 +12,7 @@ class WaitingDialog(val context: Activity) :
     override val isCancelOnTouchOutside: Boolean = false
     override val isCancelableByBack: Boolean = false
 
-    override fun initView() {
-    }
-
+    override fun initView() {}
     override fun initAction() {}
-
     override fun onDismissListener() {}
-
 }
