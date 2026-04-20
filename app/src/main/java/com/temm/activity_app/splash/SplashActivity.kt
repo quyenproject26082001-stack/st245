@@ -3,20 +3,14 @@ package com.temm.activity_app.splash
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.view.LayoutInflater
-import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.temm.core.base.BaseActivity
 import com.temm.core.extensions.initNetworkMonitor
 import com.temm.databinding.ActivitySplashBinding
 import com.temm.activity_app.intro.IntroActivity
 import com.temm.activity_app.language.LanguageActivity
-import com.temm.activity_app.main.DataViewModel
-import kotlinx.coroutines.launch
 
 class SplashActivity : BaseActivity<ActivitySplashBinding>() {
-    var intentActivity: Intent? = null
-    private val dataViewModel: DataViewModel by viewModels()
-    private val splashDuration = 3000L // 3 seconds
+    private val splashDuration = 3000L
 
     override fun setViewBinding(): ActivitySplashBinding {
         return ActivitySplashBinding.inflate(LayoutInflater.from(this))
@@ -30,34 +24,22 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>() {
             finish(); return
         }
 
-        intentActivity = if (sharePreference.getIsFirstLang()) {
+        val nextActivity = if (sharePreference.getIsFirstLang()) {
             Intent(this, LanguageActivity::class.java)
         } else {
             Intent(this, IntroActivity::class.java)
         }
         initNetworkMonitor()
 
-        // Start loading data
-        dataViewModel.ensureData(this)
-
-        // Wait exactly 3 seconds before navigating
         binding.root.postDelayed({
             if (!isFinishing) {
-                startActivity(intentActivity)
+                startActivity(nextActivity)
                 finishAffinity()
             }
         }, splashDuration)
     }
 
-    override fun dataObservable() {
-        // Data will be loaded in background, but we won't navigate until 3 seconds pass
-    }
-
-    override fun viewListener() {
-    }
-
-    override fun initText() {}
-
+    override fun viewListener() {}
     override fun initActionBar() {}
 
     @SuppressLint("GestureBackNavigation", "MissingSuperCall")

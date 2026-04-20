@@ -7,7 +7,6 @@ import com.temm.core.base.BaseActivity
 import com.temm.core.utils.DataLocal
 import com.temm.databinding.ActivityIntroBinding
 import com.temm.activity_app.main.MainActivity
-import com.temm.activity_app.permission.PermissionActivity
 import com.temm.core.extensions.setOnSingleClick
 import kotlin.system.exitProcess
 
@@ -26,8 +25,6 @@ class IntroActivity : BaseActivity<ActivityIntroBinding>() {
         binding.btnNext.setOnSingleClick { handleNext() }
     }
 
-    override fun initText() {}
-
     override fun initActionBar() {}
 
     private fun initVpg() {
@@ -44,13 +41,7 @@ class IntroActivity : BaseActivity<ActivityIntroBinding>() {
             if (nextItem < DataLocal.itemIntroList.size) {
                 vpgTutorial.setCurrentItem(nextItem, true)
             } else {
-                val intent =
-                    if (sharePreference.getIsFirstPermission()) {
-                        Intent(this@IntroActivity, MainActivity::class.java)
-                    } else {
-                        Intent(this@IntroActivity, MainActivity::class.java)
-                    }
-                startActivity(intent)
+                startActivity(Intent(this@IntroActivity, MainActivity::class.java))
                 finishAffinity()
             }
         }

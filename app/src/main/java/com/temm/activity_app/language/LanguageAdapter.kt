@@ -1,6 +1,5 @@
 package com.temm.activity_app.language
 
-import android.annotation.SuppressLint
 import android.content.Context
 import com.temm.R
 import com.temm.core.base.BaseAdapter
@@ -37,10 +36,4 @@ class LanguageAdapter(val context: Context) : BaseAdapter<LanguageModel, ItemLan
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun submitItem(position: Int) {
-        items.forEach { it.activate = false }
-        items[position].activate = true
-        notifyDataSetChanged()
-    }
 }

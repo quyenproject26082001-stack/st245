@@ -3,8 +3,6 @@ package com.temm.core.extensions
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
@@ -13,12 +11,10 @@ import androidx.annotation.FontRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.core.graphics.createBitmap
 import com.temm.R
 import com.temm.activity_app.main.MainActivity
 import com.temm.core.helper.RateHelper
 import com.temm.core.helper.SharePreferenceHelper
-import com.temm.core.helper.SoundHelper
 import com.temm.core.utils.DataLocal
 import com.temm.core.utils.state.RateState
 
@@ -51,13 +47,6 @@ fun Activity.handleBackRightToLeft() {
     finish()
     overridePendingTransition(R.anim.slide_out_right, R.anim.slide_in_left)
 }
-fun Context.handleBackFragmentFromRight() {
-    if (this is FragmentActivity) {
-        overridePendingTransition(R.anim.slide_out_left, R.anim.slide_in_right)
-        supportFragmentManager.popBackStack()
-    }
-}
-
 
 fun Activity.goHome() {
     val intent = Intent(this, MainActivity::class.java)
@@ -67,7 +56,7 @@ fun Activity.goHome() {
 }
 
 
-fun Activity.hideNavigation(isBlack: Boolean = true) {
+fun Activity.hideNavigation(isBlack: Boolean = false) {
     window?.setFlags(
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -94,31 +83,6 @@ fun View.setOnSingleClick(interval: Long = 200, action: (View) -> Unit) {
         }
     }
 }
-fun View.setOnSingleClickWithSound(interval: Long = 500, action: (View) -> Unit) {
-    setOnClickListener {
-        if (System.currentTimeMillis() - DataLocal.lastClickTime >= interval) {
-            SoundHelper.playSound(R.raw.touch)
-            action(it)
-            DataLocal.lastClickTime = System.currentTimeMillis()
-        }
-    }
-}
-
-// ----------------------------
-// UI Capture
-// ----------------------------
-@Throws(OutOfMemoryError::class)
-fun createBitmapFromView(view: View): Bitmap {
-    return try {
-        val output = createBitmap(view.width, view.height)
-        val canvas = Canvas(output)
-        view.draw(canvas)
-        output
-    } catch (error: OutOfMemoryError) {
-        throw error
-    }
-}
-
 // ----------------------------
 // TextView
 // ----------------------------

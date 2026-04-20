@@ -8,6 +8,5 @@ data class InstrumentModel(
     val noteCount: Int,
     val isSelected: Boolean = false,
     val isUnlocked: Boolean = false,
-    val isAvailable: Boolean = true,
     val drawable: Drawable? = null
 )

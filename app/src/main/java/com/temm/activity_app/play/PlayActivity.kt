@@ -89,7 +89,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             characterAdapter.submitList(charactersAsync.await())
             val backgrounds = backgroundsAsync.await()
             backgroundAdapter.submitList(backgrounds)
-            instrumentAdapter.submitList(instrumentsAsync.await())
+            val instruments = instrumentsAsync.await()
+            instrumentAdapter.submitList(instruments)
+            instruments.find { it.isSelected }?.let { updateNoteLayout(it.noteCount) }
 
             // Preload remaining Lottie files in background (selected already cached above)
             withContext(Dispatchers.IO) {
@@ -121,20 +123,25 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
 
+    private fun openPanel(panel: View) {
+        binding.panelCharacter.visibility = View.GONE
+        binding.panelBackground.visibility = View.GONE
+        binding.panelInstrument.visibility = View.GONE
+        panel.visibility = View.VISIBLE
+        binding.panelScrim.visibility = View.VISIBLE
+    }
+
     private fun closePanelIfOpen(): Boolean {
         return when (View.VISIBLE) {
-            binding.panelCharacter.visibility -> {
-                binding.panelCharacter.visibility = View.GONE; true
-            }
-
-            binding.panelBackground.visibility -> {
-                binding.panelBackground.visibility = View.GONE; true
-            }
-
+            binding.panelCharacter.visibility,
+            binding.panelBackground.visibility,
             binding.panelInstrument.visibility -> {
-                binding.panelInstrument.visibility = View.GONE; true
+                binding.panelCharacter.visibility = View.GONE
+                binding.panelBackground.visibility = View.GONE
+                binding.panelInstrument.visibility = View.GONE
+                binding.panelScrim.visibility = View.GONE
+                true
             }
-
             else -> false
         }
     }
@@ -176,34 +183,34 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     // Load the given image type (default / left / right) from the current skin + instrument folder
     // Using InputStream directly from assets — more reliable than Glide for local asset files
     private fun loadCharacterImage(type: String) {
-        try {
-            val stream = assets.open("skin/$currentSkinId/$currentInstrumentId/$type.png")
-            binding.btnCharacter.setImageDrawable(Drawable.createFromStream(stream, null))
-            stream.close()
-        } catch (e: Exception) {
-            // Some instruments only have default.png — fall back silently
+        val candidates = if (type == "default") listOf("default") else listOf(type, "active", "default")
+        for (name in candidates) {
+            try {
+                val stream = assets.open("skin/$currentSkinId/$currentInstrumentId/$name.png")
+                binding.btnCharacter.setImageDrawable(Drawable.createFromStream(stream, null))
+                stream.close()
+                return
+            } catch (_: Exception) {}
         }
     }
 
     // Bottom bar buttons toggle their respective panels
     private fun setupBottomBar() {
+        binding.panelScrim.setOnClickListener { closePanelIfOpen() }
+
         binding.btnBackgroundFragment.setOnClickListener {
-            val isVisible = binding.panelBackground.visibility == View.VISIBLE
-            binding.panelCharacter.visibility = View.GONE
-            binding.panelBackground.visibility = if (isVisible) View.GONE else View.VISIBLE
+            if (binding.panelBackground.visibility == View.VISIBLE) closePanelIfOpen()
+            else openPanel(binding.panelBackground)
         }
 
         binding.btnCharacterFgagment.setOnClickListener {
-            val isVisible = binding.panelCharacter.visibility == View.VISIBLE
-            binding.panelBackground.visibility = View.GONE
-            binding.panelCharacter.visibility = if (isVisible) View.GONE else View.VISIBLE
+            if (binding.panelCharacter.visibility == View.VISIBLE) closePanelIfOpen()
+            else openPanel(binding.panelCharacter)
         }
 
         binding.btnInstrumentFragment.setOnClickListener {
-            val isVisible = binding.panelInstrument.visibility == View.VISIBLE
-            binding.panelCharacter.visibility = View.GONE
-            binding.panelBackground.visibility = View.GONE
-            binding.panelInstrument.visibility = if (isVisible) View.GONE else View.VISIBLE
+            if (binding.panelInstrument.visibility == View.VISIBLE) closePanelIfOpen()
+            else openPanel(binding.panelInstrument)
         }
     }
 
@@ -221,11 +228,15 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                     lifecycleScope.launch {
                         val instruments = withContext(Dispatchers.IO) { loadInstruments() }
                         instrumentAdapter.submitList(instruments)
+                        instruments.find { it.isSelected }?.let {
+                            soundPlayer.load(it.id)
+                            updateNoteLayout(it.noteCount)
+                        }
                     }
                     showDefault()
-                    binding.panelCharacter.visibility = View.GONE
+                    closePanelIfOpen()
                 }
-                else -> binding.panelCharacter.visibility = View.GONE
+                else -> closePanelIfOpen()
             }
         }
     }
@@ -286,9 +297,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                     lottieCache[clickedItem.jsonPath]?.let { binding.btnBackground.setComposition(it) }
                         ?: binding.btnBackground.setAnimation(clickedItem.jsonPath)
                     binding.btnBackground.playAnimation()
-                    binding.panelBackground.visibility = View.GONE
+                    closePanelIfOpen()
                 }
-                else -> binding.panelBackground.visibility = View.GONE
+                else -> closePanelIfOpen()
             }
         }
     }
@@ -340,7 +351,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         binding.rcvInstrumentPanel.adapter = instrumentAdapter
         instrumentAdapter.onItemClick = { clickedItem ->
             when {
-                !clickedItem.isAvailable -> Unit
                 !clickedItem.isUnlocked -> showUnlockInstrumentDialog(clickedItem)
                 !clickedItem.isSelected -> {
                     sharePreference.setSelectedInstrument(clickedItem.id)
@@ -350,17 +360,21 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                     currentInstrumentId = clickedItem.id
                     soundPlayer.load(clickedItem.id)
                     showDefault()
-                    if (clickedItem.noteCount == 8) {
-                        binding.notes8.visibility = View.VISIBLE
-                        binding.notes2.visibility = View.GONE
-                    } else {
-                        binding.notes2.visibility = View.VISIBLE
-                        binding.notes8.visibility = View.GONE
-                    }
-                    binding.panelInstrument.visibility = View.GONE
+                    updateNoteLayout(clickedItem.noteCount)
+                    closePanelIfOpen()
                 }
-                else -> binding.panelInstrument.visibility = View.GONE
+                else -> closePanelIfOpen()
             }
+        }
+    }
+
+    private fun updateNoteLayout(noteCount: Int) {
+        if (noteCount == 8) {
+            binding.notes8.visibility = View.VISIBLE
+            binding.notes2.visibility = View.GONE
+        } else {
+            binding.notes2.visibility = View.VISIBLE
+            binding.notes8.visibility = View.GONE
         }
     }
 
@@ -375,19 +389,19 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
             assets.list("skin/$currentSkinId/$it") != null
         }
         if (availableFolders.isNotEmpty()) {
-            val firstId = availableFolders.first()
+            val defaultId = if (availableFolders.contains("piano")) "piano" else availableFolders.first()
             if (unlockedIds.isEmpty()) {
-                unlockedIds.add(firstId); sharePreference.setUnlockedInstruments(unlockedIds)
+                unlockedIds.add(defaultId); sharePreference.setUnlockedInstruments(unlockedIds)
             }
             if (selectedId.isEmpty() || !availableFolders.contains(selectedId)) {
-                selectedId = firstId; sharePreference.setSelectedInstrument(selectedId)
+                selectedId = defaultId; sharePreference.setSelectedInstrument(selectedId)
             }
         }
         if (currentInstrumentId !in availableFolders) {
             currentInstrumentId = availableFolders.firstOrNull() ?: currentInstrumentId
         }
         val unlockAll = sharePreference.getUnlockAll()
-        return validFolders.map { folder ->
+        return availableFolders.map { folder ->
             val navPath = "instrument/let_play/$folder/nav.png"
             val files = assets.list("instrument/let_play/$folder") ?: emptyArray()
             val noteCount = files.count { it.endsWith(".mp3") }
@@ -396,7 +410,6 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
                 id = folder, navPath = navPath, noteCount = noteCount,
                 isUnlocked = unlockAll || unlockedIds.contains(folder),
                 isSelected = folder == selectedId,
-                isAvailable = availableFolders.contains(folder),
                 drawable = drawable
             )
         }
@@ -419,6 +432,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun setupSongGuide() {
+        // Step 1: Read all .txt files from assets/song/ and store them as Song objects
         songs = assets.list("song")
             ?.filter { it.endsWith(".txt") }
             ?.map { fileName ->
@@ -429,87 +443,89 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
         if (songs.isEmpty()) return
 
-        val density = resources.displayMetrics.scaledDensity
-
-        fun applyDescriptionSize(isSmall: Boolean) {
-            if (isSmall) {
-                binding.tvDescription.textSize = 12f
-                binding.tvDescription.setLineSpacing(0f, 0.85f)
-            } else {
-                binding.tvDescription.textSize = 16f
-                binding.tvDescription.setLineSpacing(0f, 1f)
-            }
-            val spSize = binding.tvDescription.textSize / resources.displayMetrics.scaledDensity
-            android.util.Log.d("tvDesc", "applySize: isSmall=$isSmall → textSize=${spSize}sp")
-        }
-
-        fun needsSmallSize(text: String, width: Int): Boolean {
-            val paint = TextPaint(binding.tvDescription.paint)
-            paint.textSize = 16f * density
-            val lineCount = StaticLayout.Builder
-                .obtain(text, 0, text.length, paint, width.coerceAtLeast(1))
-                .setLineSpacing(0f, 1f)
-                .build()
-                .lineCount
-            val result = lineCount >= 3
-            android.util.Log.d("tvDesc", "needsSmallSize: song=\"${songs[currentSongIndex].name}\" measuredWidth=$width staticLineCount=$lineCount → isSmall=$result")
-            return result
-        }
-
-        fun showSong(index: Int) {
-            val notes = songs[index].notes
-            binding.songName.text = songs[index].name
-
-            val innerWidth = (binding.tvDescription.width
-                - binding.tvDescription.paddingLeft
-                - binding.tvDescription.paddingRight)
-                .takeIf { it > 0 }
-
-            android.util.Log.d("tvDesc", "showSong: song=\"${songs[index].name}\" viewWidth=${binding.tvDescription.width} paddingL=${binding.tvDescription.paddingLeft} paddingR=${binding.tvDescription.paddingRight} innerWidth=$innerWidth")
-
-            if (innerWidth != null) {
-                applyDescriptionSize(needsSmallSize(notes, innerWidth))
-                binding.tvDescription.text = notes
-                binding.tvDescription.post {
-                    android.util.Log.d("tvDesc", "post-layout: song=\"${songs[index].name}\" actualLineCount=${binding.tvDescription.lineCount} viewWidth=${binding.tvDescription.width}")
-                }
-            } else {
-                binding.tvDescription.text = notes
-                binding.tvDescription.post {
-                    val w = binding.tvDescription.width - binding.tvDescription.paddingLeft - binding.tvDescription.paddingRight
-                    applyDescriptionSize(needsSmallSize(notes, w))
-                    android.util.Log.d("tvDesc", "post-layout: song=\"${songs[index].name}\" actualLineCount=${binding.tvDescription.lineCount} viewWidth=${binding.tvDescription.width}")
-                }
-            }
-        }
-
+        // Step 2: Show the current song on screen
         showSong(currentSongIndex)
 
-        fun setupRepeatButton(button: View, step: Int) {
-            val repeatRunnable = object : Runnable {
-                override fun run() {
-                    currentSongIndex = (currentSongIndex + step + songs.size) % songs.size
-                    showSong(currentSongIndex)
-                    handler.postDelayed(this, 200L)
-                }
-            }
-            button.setOnTouchListener { _, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        currentSongIndex = (currentSongIndex + step + songs.size) % songs.size
-                        showSong(currentSongIndex)
-                        handler.postDelayed(repeatRunnable, 400L)
-                    }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        handler.removeCallbacks(repeatRunnable)
-                    }
-                }
-                true
+        // Step 3: Make btnNext / btnPrevious cycle through songs while held
+        setupRepeatButton(binding.btnPrevious, step = -1)
+        setupRepeatButton(binding.btnNext, step = +1)
+    }
+
+    // Shows the song at the given index: updates song name label and note description
+    private fun showSong(index: Int) {
+        val song = songs[index]
+        binding.songName.text = song.name
+        binding.tvDescription.text = song.notes
+
+        // tvDescription.width is 0 before the view is drawn for the first time.
+        // post { } waits until the view finishes drawing, then we can read the real size.
+        binding.tvDescription.post {
+            adjustDescriptionTextSize(song)
+        }
+    }
+
+    // Shrinks the text to 12sp if the notes take 3 or more lines; otherwise keeps 16sp.
+    // We always measure at 16sp so the result is consistent regardless of current size.
+    private fun adjustDescriptionTextSize(song: Song) {
+        val notes = song.notes
+
+        // Convert 16sp → pixels so StaticLayout can measure correctly
+        val textSizeInPixels = 16f * resources.displayMetrics.scaledDensity
+
+        // Copy the TextView's paint and force it to 16sp for measurement
+        val paint = TextPaint(binding.tvDescription.paint)
+        paint.textSize = textSizeInPixels
+
+        // The usable width is the view width minus left/right padding
+        val usableWidth = (binding.tvDescription.width
+            - binding.tvDescription.paddingLeft
+            - binding.tvDescription.paddingRight)
+            .coerceAtLeast(1)
+
+        // StaticLayout pre-measures how many lines the text would take at 16sp
+        val lineCount = StaticLayout.Builder
+            .obtain(notes, 0, notes.length, paint, usableWidth)
+            .setLineSpacing(0f, 1f)
+            .build()
+            .lineCount
+
+        val isLongText = lineCount >= 3
+
+        if (isLongText) {
+            binding.tvDescription.textSize = 12f
+            binding.tvDescription.setLineSpacing(0f, 0.85f)
+        } else {
+            binding.tvDescription.textSize = 16f
+            binding.tvDescription.setLineSpacing(0f, 1f)
+        }
+    }
+
+    // Makes a button navigate songs while held down (repeats every 200ms after a 400ms delay)
+    private fun setupRepeatButton(button: View, step: Int) {
+        val repeatRunnable = object : Runnable {
+            override fun run() {
+                // Wrap around: going past the last song loops back to the first, and vice versa
+                currentSongIndex = (currentSongIndex + step + songs.size) % songs.size
+                showSong(currentSongIndex)
+                handler.postDelayed(this, 200L)
             }
         }
 
-        setupRepeatButton(binding.btnPrevious, -1)
-        setupRepeatButton(binding.btnNext, +1)
+        button.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Navigate immediately on first press, then start repeating
+                    currentSongIndex = (currentSongIndex + step + songs.size) % songs.size
+                    showSong(currentSongIndex)
+                    handler.postDelayed(repeatRunnable, 400L)
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // Stop repeating when the finger is lifted or the touch is cancelled
+                    handler.removeCallbacks(repeatRunnable)
+                }
+            }
+            true
+        }
     }
 
     override fun onDestroy() {

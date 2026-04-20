@@ -18,7 +18,7 @@ import com.temm.activity_app.main.MainActivity
 import com.temm.activity_app.intro.IntroActivity
 import com.temm.core.extensions.setOnSingleClick
 import com.temm.core.extensions.strings
-import com.temm.ui.language.LanguageViewModel
+import com.temm.activity_app.language.LanguageViewModel
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -83,8 +83,6 @@ class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
             val p = (8 * resources.displayMetrics.density).toInt() // 6dp
             binding.actionBar.btnActionBarRight.setPadding(p, p, p, p)
             binding.actionBar.btnActionBarRight.setImageResource(R.drawable.ic_done_first_setting)
-//            binding.actionBar.btnActionBarRight.translationY =
-//                (8 * resources.displayMetrics.density) // 2dp
         } else {
             binding.actionBar.btnActionBarRight.setImageResource(R.drawable.ic_done)
         }
