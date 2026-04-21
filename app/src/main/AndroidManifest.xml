@@ -21,7 +21,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BaseProject"
         tools:replace="android:fullBackupContent">
-
+        <activity
+            android:name=".activity_app.secret.DancesActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity_app.secret.SecretPlayActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity_app.secret.SecretActivity"
+            android:exported="false" />
         <activity
             android:name=".activity_app.splash.SplashActivity"
             android:exported="true"
@@ -48,7 +57,6 @@
             android:name=".activity_app.main.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".activity_app.SettingsActivity"
             android:exported="false"
@@ -57,7 +65,6 @@
             android:name=".activity_app.play.PlayActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
 
         <meta-data
             android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"

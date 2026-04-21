@@ -27,7 +27,7 @@ fun Activity.requestPermission(permissions: Array<String>, requestCode: Int) {
 }
 
 fun Activity.goToSettings() {
-    val dialog = YesNoDialog(this, R.string.permission, R.string.go_to_setting_message)
+    val dialog = YesNoDialog(this,  R.string.go_to_setting_message)
     LanguageHelper.setLocale(this)
     dialog.show()
 

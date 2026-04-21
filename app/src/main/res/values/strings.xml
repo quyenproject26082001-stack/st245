@@ -1,5 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools"
-    tools:locale="en">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
     <string name="app_name" translatable="false">Test_ST245_Music_Cat_Funny</string>
     <string name="go_to_setting_message">The app needs this permission</string>
     <string name="settings">\u00A0Setting\u00A0</string>
@@ -144,4 +143,7 @@
     <string name="unlock_all">Unlock All</string>
     <string name="no_skin">No Skin</string>
     <string name="guide_play">1121-43 1121-43 1186-432 7764-54</string>
+    <string name="play_secret">PLAY</string>
+    <string name="unlock_item_s">UNLOCK</string>
+    <string name="unlock_item_secret">UNLOCK</string>
 </resources>

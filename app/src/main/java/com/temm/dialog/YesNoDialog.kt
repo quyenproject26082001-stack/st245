@@ -11,7 +11,7 @@ import com.temm.databinding.DialogConfirmBinding
 
 
 class YesNoDialog(
-    val context: Activity, val title: Int, val description: Int, val isError: Boolean = false
+    val context: Activity, val description: Int, val isError: Boolean = false
 ) : BaseDialog<DialogConfirmBinding>(context, maxWidth = true, maxHeight = true) {
     override val layoutId: Int = R.layout.dialog_confirm
     override val isCancelOnTouchOutside: Boolean = false

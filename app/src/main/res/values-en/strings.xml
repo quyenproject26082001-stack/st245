@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="guide_play">1121-43 1121-43 1186-432 7764-54</string>
+    <string name="play_secret">PLAY</string>
+    <string name="unlock_item_s">UNLOCK</string>
+    <string name="unlock_item_secret">UNLOCK</string>
 </resources>
