@@ -269,7 +269,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun showUnlockCharacterDialog(item: CharacterModel) {
-        val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
+        val dialog = YesNoDialog(this,  R.string.watch_video_to_unlock_this_item)
         dialog.onYesClick = {
             val unlocked = sharePreference.getUnlockedCharacters()
             unlocked.add(item.id)
@@ -332,7 +332,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun showUnlockBackgroundDialog(item: BackgroundItemModel) {
-        val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
+        val dialog = YesNoDialog(this, R.string.watch_video_to_unlock_this_item)
         dialog.onYesClick = {
             val unlocked = sharePreference.getUnlockedBackgrounds()
             unlocked.add(item.id)
@@ -416,7 +416,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun showUnlockInstrumentDialog(item: InstrumentModel) {
-        val dialog = YesNoDialog(this, R.string.unlock, R.string.watch_video_to_unlock_this_item)
+        val dialog = YesNoDialog(this,  R.string.watch_video_to_unlock_this_item)
         dialog.onYesClick = {
             val unlocked = sharePreference.getUnlockedInstruments()
             unlocked.add(item.id)

@@ -19,6 +19,7 @@ import com.temm.core.utils.state.RateState
 import com.temm.databinding.ActivityHomeBinding
 import com.temm.activity_app.SettingsActivity
 import com.temm.activity_app.play.PlayActivity
+import com.temm.activity_app.secret.SecretActivity
 
 import com.temm.core.extensions.gone
 import com.temm.core.extensions.invisible
@@ -56,6 +57,9 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
             btnPlayHome.setOnSingleClick {
                 startIntentRightToLeft(PlayActivity::class.java)
             }
+
+            btnSecret.setOnSingleClick { startIntentRightToLeft(SecretActivity::class.java) }
+
 
 
         }

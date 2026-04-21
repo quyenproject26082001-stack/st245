@@ -21,11 +21,11 @@ class InstrumentSoundPlayer(private val context: Context) {
 
     // Load all sounds for the given instrument from assets
     // e.g. instrument/let_play/piano/1.mp3 ... 8.mp3
-    fun load(instrumentId: String) {
+    fun load(instrumentId: String, subfolder: String = "let_play") {
         soundMap.values.forEach { soundPool.unload(it) }
         soundMap.clear()
 
-        val folder = "instrument/let_play/$instrumentId"
+        val folder = "instrument/$subfolder/$instrumentId"
         val count = context.assets.list(folder)?.count { it.endsWith(".mp3") } ?: 0
         for (note in 1..count) {
             val afd = context.assets.openFd("$folder/$note.mp3")
