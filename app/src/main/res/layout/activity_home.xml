@@ -5,6 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+
     tools:context=".activity_app.main.MainActivity">
 
     <!-- Background Image -->
@@ -14,17 +16,54 @@
         android:scaleType="centerCrop"
         android:src="@drawable/img_bg_app" />
 
-    <!-- Action Bar -->
-    <FrameLayout
-        android:id="@+id/layoutActionBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent">
 
-        <include
-            android:id="@+id/actionBar"
-            layout="@layout/layout_actionbar" />
+    <ImageView
+        android:id="@+id/btnActionBarRight1"
+        android:layout_width="58dp"
+        android:layout_height="72dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/ic_settings"
+        android:visibility="visible"
+        android:layout_marginTop="60dp"
+        android:clipChildren="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
+
+    <!--            btnActionBarRightText-->
+    <FrameLayout
+        android:id="@+id/btnActionBarRightText"
+        android:layout_width="wrap_content"
+        android:layout_height="72dp"
+        android:visibility="visible"
+        android:clipToPadding="false"
+        android:clipToOutline="false"
+        android:layout_marginTop="60dp"
+        android:clipChildren="false"
+        app:layout_constraintEnd_toEndOf="@id/btnActionBarRight1"
+        app:layout_constraintStart_toStartOf="@id/btnActionBarRight1"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <com.temm.core.custom.text.DoubleStrokeTextView
+            android:id="@+id/tvRightText"
+            style="@style/single_marquee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/cherrybombone_regular"
+            android:gravity="center"
+            android:text="@string/settings"
+            app:outerStrokeColor="#000000"
+            android:layout_marginBottom="10dp"
+            app:outerStrokeWidth="2dp"
+            android:layout_marginTop="40dp"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
     </FrameLayout>
+
 
     <!-- Title Image - Centered -->
     <ImageView
@@ -32,12 +71,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginHorizontal="25dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="20dp"
         android:src="@drawable/img_app_name"
         app:layout_constraintDimensionRatio="312:40"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutActionBar" />
+        app:layout_constraintTop_toBottomOf="@id/btnActionBarRightText"
+        />
 
     <!-- Frame Home -->
     <ImageView

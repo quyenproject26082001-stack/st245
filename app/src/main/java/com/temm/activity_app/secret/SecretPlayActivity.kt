@@ -31,6 +31,8 @@ class SecretPlayActivity : AppCompatActivity() {
 
     // Instrument được truyền từ SecretActivity qua intent ("guitar", "harp", ...)
     private var currentInstrumentId = "piano"
+    // Skin tương ứng với vị trí item: item 0 → skin "1", item 1 → skin "2", ...
+    private var currentSkinId = "1"
 
     // Chuỗi nốt đúng đọc từ txt, vd: [1, 3, 5, 2, 4]
     private var targetSequence: List<Int> = emptyList()
@@ -50,8 +52,9 @@ class SecretPlayActivity : AppCompatActivity() {
             insets
         }
 
-        // Nhận instrument từ SecretActivity
+        // Nhận instrument và skin từ SecretActivity
         currentInstrumentId = intent.getStringExtra("instrument") ?: "piano"
+        currentSkinId = intent.getStringExtra("skin") ?: "1"
 
         // Load âm thanh từ assets/instrument/secret_melody/{instrument}/
         soundPlayer.load(currentInstrumentId, "secret_melody")
@@ -60,6 +63,7 @@ class SecretPlayActivity : AppCompatActivity() {
         noteIconManager.setRandomSpawnPoints(5, -150f..150f, -10f..150f)
         loadCharacterImage("default")
         loadBackground()
+        setupNoteLayout()
 
         // Load sequence mục tiêu + hiển thị gợi ý lên tvDescription
         setupSongGuide()
@@ -67,6 +71,19 @@ class SecretPlayActivity : AppCompatActivity() {
         setupNoteButtons()
 
         binding.btnBack.setOnClickListener { finish() }
+    }
+
+    // Xác định số nốt của instrument, ẩn/hiện layout phù hợp và wire buttons
+    private fun setupNoteLayout() {
+        val noteCount = assets.list("instrument/secret_melody/$currentInstrumentId")
+            ?.count { it.endsWith(".mp3") } ?: 8
+        if (noteCount <= 2) {
+            binding.notes8.visibility = android.view.View.GONE
+            binding.notes2.visibility = android.view.View.VISIBLE
+        } else {
+            binding.notes8.visibility = android.view.View.VISIBLE
+            binding.notes2.visibility = android.view.View.GONE
+        }
     }
 
     // Load background JSON đã chọn từ PlayActivity (dùng chung SharedPreferences)
@@ -90,8 +107,13 @@ class SecretPlayActivity : AppCompatActivity() {
                 .bufferedReader().readText().trim()
             binding.tvDescription.text = text
 
-            // Parse tất cả số nguyên trong file làm chuỗi mục tiêu
-            targetSequence = Regex("\\d+").findAll(text).map { it.value.toInt() }.toList()
+            // Parse chuỗi mục tiêu: L/R → 1/2, chữ số → từng ký tự riêng lẻ (vd: "332" → [3,3,2])
+            targetSequence = if (text.contains(Regex("[LRlr]"))) {
+                text.filter { it == 'L' || it == 'l' || it == 'R' || it == 'r' }
+                    .map { if (it.uppercaseChar() == 'L') 1 else 2 }
+            } else {
+                text.filter { it.isDigit() }.map { it.digitToInt() }
+            }
         } catch (_: Exception) {}
     }
 
@@ -107,6 +129,9 @@ class SecretPlayActivity : AppCompatActivity() {
         binding.btn6.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(6); showRight(); onNotePressed(6) }
         binding.btn7.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(7); showRight(); onNotePressed(7) }
         binding.btn8.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(8); showRight(); onNotePressed(8) }
+        // Nút 2-note (kick, table): L=1, R=2
+        binding.btnLeft.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft(); onNotePressed(1) }
+        binding.btnRight.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showRight(); onNotePressed(2) }
     }
 
     // Ghi nhận nốt vừa nhấn, chỉ giữ N nốt cuối (N = độ dài target)
@@ -151,7 +176,7 @@ class SecretPlayActivity : AppCompatActivity() {
         val candidates = if (type == "default") listOf("default") else listOf(type, "active", "default")
         for (name in candidates) {
             try {
-                val stream = assets.open("skin/1/$currentInstrumentId/$name.png")
+                val stream = assets.open("skin/$currentSkinId/$currentInstrumentId/$name.png")
                 binding.btnCharacter.setImageDrawable(Drawable.createFromStream(stream, null))
                 stream.close()
                 return
