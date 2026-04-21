@@ -42,9 +42,10 @@ class SecretActivity : AppCompatActivity() {
                 }
                 dialog.show()
             } else {
-                // Item đã mở khóa → chuyển sang màn chơi, truyền tên instrument
+                // Item đã mở khóa → chuyển sang màn chơi, truyền instrument + skin theo vị trí
                 val intent = Intent(this, SecretPlayActivity::class.java)
                 intent.putExtra("instrument", secret.Instrument)
+                intent.putExtra("skin", (position + 1).toString())
                 startActivity(intent)
             }
         }
@@ -73,6 +74,9 @@ class SecretActivity : AppCompatActivity() {
             Secret(R.drawable.img_secret6, getString(R.string.unlock_item_secret), prefs.getBoolean("key_ukulele", false), "ukulele"),
         )
         recyclerView()
+
+        binding.btnBack.setOnClickListener { finish() }
+
     }
 
     override fun onResume() {
