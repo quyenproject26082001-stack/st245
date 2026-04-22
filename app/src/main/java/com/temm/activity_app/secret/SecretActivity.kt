@@ -36,8 +36,7 @@ class SecretActivity : AppCompatActivity() {
                 val dialog = YesNoDialog(this@SecretActivity, R.string.unlock_item_secret)
                 dialog.onYesClick = {
                     secret.isLocked = false
-                    // Lưu trạng thái mở khóa theo vị trí
-                    prefs.edit().putBoolean("key_$position", secret.isLocked).apply()
+                    prefs.edit().putBoolean("key_${secret.Instrument}", false).apply()
                     adapter.notifyItemChanged(position)
                 }
                 dialog.show()
@@ -66,12 +65,12 @@ class SecretActivity : AppCompatActivity() {
 
         // Khởi tạo danh sách instrument, đọc trạng thái khóa từ SharedPreferences
         listSecret = listOf(
-            Secret(R.drawable.img_secret1, getString(R.string.unlock_item_secret), prefs.getBoolean("key_guitar", false), "guitar"),
-            Secret(R.drawable.img_secret2, getString(R.string.unlock_item_secret), prefs.getBoolean("key_harp", false), "harp"),
-            Secret(R.drawable.img_secret3, getString(R.string.unlock_item_secret), prefs.getBoolean("key_kick", false), "kick"),
-            Secret(R.drawable.img_secret4, getString(R.string.unlock_item_secret), prefs.getBoolean("key_pad", false), "pad"),
-            Secret(R.drawable.img_secret5, getString(R.string.unlock_item_secret), prefs.getBoolean("key_table", false), "table"),
-            Secret(R.drawable.img_secret6, getString(R.string.unlock_item_secret), prefs.getBoolean("key_ukulele", false), "ukulele"),
+            Secret(R.drawable.img_secret1, getString(R.string.unlock_item_secret), prefs.getBoolean("key_guitar", true), "guitar"),
+            Secret(R.drawable.img_secret2, getString(R.string.unlock_item_secret), prefs.getBoolean("key_harp", true), "harp"),
+            Secret(R.drawable.img_secret3, getString(R.string.unlock_item_secret), prefs.getBoolean("key_kick", true), "kick"),
+            Secret(R.drawable.img_secret4, getString(R.string.unlock_item_secret), prefs.getBoolean("key_pad", true), "pad"),
+            Secret(R.drawable.img_secret5, getString(R.string.unlock_item_secret), prefs.getBoolean("key_table", true), "table"),
+            Secret(R.drawable.img_secret6, getString(R.string.unlock_item_secret), prefs.getBoolean("key_ukulele", true), "ukulele"),
         )
         recyclerView()
 

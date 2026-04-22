@@ -3,6 +3,9 @@ package com.temm.core.extensions
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
+import android.view.MotionEvent
+import android.view.TouchDelegate
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
@@ -56,7 +59,7 @@ fun Activity.goHome() {
 }
 
 
-fun Activity.hideNavigation(isBlack: Boolean = false) {
+fun Activity.hideNavigation(isBlack: Boolean = true) {
     window?.setFlags(
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -96,4 +99,26 @@ fun TextView.setTextContent(context: Context, resId: Int) {
 
 fun Context.strings(resId: Int) : String {
     return getString(resId)
+}
+
+// Expand the touch area of a view by extraDp on each side without changing its visual size.
+// Safe to call on multiple siblings sharing the same parent — chains delegates automatically.
+fun View.expandTouchArea(extraDp: Int) {
+    val extra = (extraDp * resources.displayMetrics.density).toInt()
+    val parentView = parent as? View ?: return
+    parentView.post {
+        val rect = Rect()
+        getHitRect(rect)
+        rect.inset(-extra, -extra)
+        val target = this
+        val current = parentView.touchDelegate
+        if (current == null) {
+            parentView.touchDelegate = TouchDelegate(rect, target)
+        } else {
+            parentView.touchDelegate = object : TouchDelegate(rect, target) {
+                override fun onTouchEvent(event: MotionEvent): Boolean =
+                    current.onTouchEvent(event) || super.onTouchEvent(event)
+            }
+        }
+    }
 }

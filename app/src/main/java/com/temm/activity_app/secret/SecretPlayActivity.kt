@@ -184,9 +184,15 @@ class SecretPlayActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        soundPlayer.pause()
+    }
+
     override fun onResume() {
         super.onResume()
         hideNavigation()
+        soundPlayer.resume()
     }
 
     override fun onDestroy() {
