@@ -3,10 +3,7 @@ package com.temm.activity_app.secret
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.temm.R
 import com.temm.core.extensions.hideNavigation
@@ -33,11 +30,16 @@ class SecretActivity : AppCompatActivity() {
         adapter.onItemClick = { secret, position ->
             if (secret.isLocked) {
                 // Item đang khóa → hỏi người dùng có muốn mở khóa không
-                val dialog = YesNoDialog(this@SecretActivity, R.string.unlock_item_secret)
+                val dialog = YesNoDialog(this@SecretActivity, R.string.watch_video_to_unlock_this_item)
                 dialog.onYesClick = {
                     secret.isLocked = false
                     prefs.edit().putBoolean("key_${secret.Instrument}", false).apply()
                     adapter.notifyItemChanged(position)
+                    dialog.dismiss()   // ← thiếu cái này
+
+                }
+                dialog.onNoClick = {
+                    dialog.dismiss()
                 }
                 dialog.show()
             } else {
@@ -53,19 +55,12 @@ class SecretActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         binding = ActivitySecretBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
         // Khởi tạo danh sách instrument, đọc trạng thái khóa từ SharedPreferences
         listSecret = listOf(
-            Secret(R.drawable.img_secret1, getString(R.string.unlock_item_secret), prefs.getBoolean("key_guitar", true), "guitar"),
+            Secret(R.drawable.img_secret1, getString(R.string.unlock_item_secret), prefs.getBoolean("key_guitar", false), "guitar"),
             Secret(R.drawable.img_secret2, getString(R.string.unlock_item_secret), prefs.getBoolean("key_harp", true), "harp"),
             Secret(R.drawable.img_secret3, getString(R.string.unlock_item_secret), prefs.getBoolean("key_kick", true), "kick"),
             Secret(R.drawable.img_secret4, getString(R.string.unlock_item_secret), prefs.getBoolean("key_pad", true), "pad"),

@@ -50,8 +50,8 @@
         <com.temm.core.custom.text.DoubleStrokeTextView
             android:id="@+id/tvRightText"
             style="@style/single_marquee"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
             android:layout_gravity="center"
             android:fontFamily="@font/cherrybombone_regular"
             android:gravity="center"
