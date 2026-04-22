@@ -26,8 +26,6 @@ class LanguageAdapter(val context: Context) : BaseAdapter<LanguageModel, ItemLan
 
             } else {
                 langSelect.setBackgroundResource(R.drawable.bg_language)
-
-
             }
 
             root.setOnSingleClick {

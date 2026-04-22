@@ -13,6 +13,7 @@ import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieCompositionFactory
 import com.temm.R
 import com.temm.core.extensions.animateScaleEffect
+import com.temm.core.extensions.expandTouchArea
 import com.temm.core.helper.NoteIconManager
 import com.temm.activity_app.background.BackgroundAdapter
 import com.temm.activity_app.character.CharacterAdapter
@@ -68,6 +69,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         setupBackgroundPanel()
         setupInstrumentPanel()
         setupSongGuide()
+        binding.btnPrevious.expandTouchArea(16)
+        binding.btnNext.expandTouchArea(16)
 
         lifecycleScope.launch {
             // Load and display the selected background first so it appears immediately
@@ -111,6 +114,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         binding.btnBack.setOnClickListener {
             if (!closePanelIfOpen()) {
                 onBackPressedDispatcher.onBackPressed()
+                finish()
             }
         }
         onBackPressedDispatcher.addCallback(this, object :

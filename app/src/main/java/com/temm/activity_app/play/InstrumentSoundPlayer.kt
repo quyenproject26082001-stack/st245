@@ -40,6 +40,10 @@ class InstrumentSoundPlayer(private val context: Context) {
         }
     }
 
+    fun pause() { soundPool.autoPause() }
+
+    fun resume() { soundPool.autoResume() }
+
     // Call this in onDestroy to free memory
     fun release() {
         soundPool.release()
