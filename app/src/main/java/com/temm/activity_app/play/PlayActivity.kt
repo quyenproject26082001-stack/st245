@@ -5,6 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.view.MotionEvent
 import android.view.View
 import androidx.activity.OnBackPressedCallback
@@ -47,6 +49,9 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     private data class Song(val name: String, val notes: String)
     private var songs: List<Song> = emptyList()
     private var currentSongIndex = 0
+
+    private var expectedNotes: List<Int> = emptyList()
+    private var noteMatchIndex = 0
 
     override fun setViewBinding() = ActivityPlayBinding.inflate(layoutInflater)
 
@@ -111,16 +116,11 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     override fun viewListener() {
         setupNoteButtons()
         setupBottomBar()
-        binding.btnBack.setOnClickListener {
-            if (!closePanelIfOpen()) {
-                onBackPressedDispatcher.onBackPressed()
-                finish()
-            }
-        }
+        binding.btnBack.setOnClickListener { finish() }
         onBackPressedDispatcher.addCallback(this, object :
             OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (!closePanelIfOpen()) finish()
+                finish()
             }
         })
 
@@ -133,6 +133,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         binding.panelInstrument.visibility = View.GONE
         panel.visibility = View.VISIBLE
         binding.panelScrim.visibility = View.VISIBLE
+        binding.btnBack.bringToFront()
     }
 
     private fun closePanelIfOpen(): Boolean {
@@ -153,20 +154,46 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     // Wire each note button to its note index + character animation
     private fun setupNoteButtons() {
         // Buttons 1–4: play sound + flash left.png then return to default
-        binding.btn1.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft() }
-        binding.btn2.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showLeft() }
-        binding.btn3.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(3); showLeft() }
-        binding.btn4.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(4); showLeft() }
+        binding.btn1.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft(); onNotePlayed(1) }
+        binding.btn2.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showLeft(); onNotePlayed(2) }
+        binding.btn3.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(3); showLeft(); onNotePlayed(3) }
+        binding.btn4.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(4); showLeft(); onNotePlayed(4) }
 
         // Buttons 5–8: play sound + flash right.png then return to default
-        binding.btn5.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(5); showRight() }
-        binding.btn6.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(6); showRight() }
-        binding.btn7.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(7); showRight() }
-        binding.btn8.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(8); showRight() }
+        binding.btn5.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(5); showRight(); onNotePlayed(5) }
+        binding.btn6.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(6); showRight(); onNotePlayed(6) }
+        binding.btn7.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(7); showRight(); onNotePlayed(7) }
+        binding.btn8.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(8); showRight(); onNotePlayed(8) }
 
         // 2-note buttons
-        binding.btnLeft.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft() }
-        binding.btnRight.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showRight() }
+        binding.btnLeft.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(1); showLeft(); onNotePlayed(1) }
+        binding.btnRight.setOnClickListener { it.animateScaleEffect(); noteIconManager.showIcon(0, binding.btnCharacter); soundPlayer.play(2); showRight(); onNotePlayed(2) }
+    }
+
+    private fun onNotePlayed(note: Int) {
+        if (expectedNotes.isEmpty()) return
+        if (note == expectedNotes[noteMatchIndex]) {
+            noteMatchIndex++
+            if (noteMatchIndex >= expectedNotes.size) {
+                noteMatchIndex = 0
+                showFireworks()
+            }
+        } else {
+            noteMatchIndex = if (note == expectedNotes[0]) 1 else 0
+        }
+    }
+
+    private fun showFireworks() {
+        val overlay = binding.fireworksOverlay
+        overlay.removeAllAnimatorListeners()
+        overlay.addAnimatorListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                overlay.visibility = View.GONE
+                overlay.removeAllAnimatorListeners()
+            }
+        })
+        overlay.visibility = View.VISIBLE
+        overlay.playAnimation()
     }
 
     private fun showLeft() = showAction("left")
@@ -460,6 +487,8 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         val song = songs[index]
         binding.songName.text = song.name
         binding.tvDescription.text = song.notes
+        expectedNotes = song.notes.filter { it in '1'..'8' }.map { it.digitToInt() }
+        noteMatchIndex = 0
 
         // tvDescription.width is 0 before the view is drawn for the first time.
         // post { } waits until the view finishes drawing, then we can read the real size.
