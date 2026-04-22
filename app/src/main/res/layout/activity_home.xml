@@ -47,10 +47,10 @@
         app:layout_constraintTop_toTopOf="parent"
         >
 
-        <com.temm.core.custom.text.DoubleStrokeTextView
+        <com.cat.catpiano.music.core.custom.text.DoubleStrokeTextView
             android:id="@+id/tvRightText"
             style="@style/single_marquee"
-            android:layout_width="200dp"
+            android:layout_width="80dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:fontFamily="@font/cherrybombone_regular"
@@ -113,7 +113,7 @@
             android:src="@drawable/img_home_1"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.temm.core.custom.text.StrokeGradientTextView
+        <com.cat.catpiano.music.core.custom.text.StrokeGradientTextView
             android:id="@+id/tv1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
             android:src="@drawable/img_home_2"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.temm.core.custom.text.StrokeGradientTextView
+        <com.cat.catpiano.music.core.custom.text.StrokeGradientTextView
             android:id="@+id/tv2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

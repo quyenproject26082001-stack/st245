@@ -64,7 +64,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.temm.core.custom.text.DoubleStrokeTextView
+        <com.cat.catpiano.music.core.custom.text.DoubleStrokeTextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
@@ -273,7 +273,7 @@
         android:id="@+id/btnBackgroundFragment"
         >
 
-        <com.temm.core.custom.text.DoubleStrokeTextView
+        <com.cat.catpiano.music.core.custom.text.DoubleStrokeTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/cherrybombone_regular"
@@ -302,7 +302,7 @@
         android:id="@+id/btnCharacterFgagment"
         >
 
-        <com.temm.core.custom.text.DoubleStrokeTextView
+        <com.cat.catpiano.music.core.custom.text.DoubleStrokeTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/cherrybombone_regular"
@@ -333,7 +333,7 @@
 
         >
 
-        <com.temm.core.custom.text.DoubleStrokeTextView
+        <com.cat.catpiano.music.core.custom.text.DoubleStrokeTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/cherrybombone_regular"

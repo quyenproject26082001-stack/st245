@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.temm",
+  "applicationId": "com.cat.catpiano.music",
   "variantName": "release",
   "elements": [
     {
@@ -13,7 +13,7 @@
       "attributes": [],
       "versionCode": 1,
       "versionName": "1.0.0",
-      "outputFile": "XyloPhone v1.0.0_01.20.2026-release.apk"
+      "outputFile": "ST245_Music_Cat_Funny_V1.0.0_04.22.2026-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/XyloPhone v1.0.0_01.20.2026-release.dm"
+        "baselineProfiles/1/ST245_Music_Cat_Funny_V1.0.0_04.22.2026-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/XyloPhone v1.0.0_01.20.2026-release.dm"
+        "baselineProfiles/0/ST245_Music_Cat_Funny_V1.0.0_04.22.2026-release.dm"
       ]
     }
   ],

@@ -81,6 +81,6 @@
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }
 
--keep class com.temm.activity_app.splash.SplashActivity.** {*; }
--keep class com.temm.data.** {*; }
+-keep class com.cat.catpiano.music.activity_app.splash.SplashActivity.** {*; }
+-keep class com.cat.catpiano.music.data.** {*; }
 -keep public class com.google.android.gms.** { public protected *; }

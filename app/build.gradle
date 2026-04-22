@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.temm'
+    namespace 'com.cat.catpiano.music'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.temm"
+        applicationId "com.cat.catpiano.music"
         minSdk 24
         targetSdk 36
         versionCode 1

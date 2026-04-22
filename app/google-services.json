@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "662948067326",
-    "project_id": "st182-xylophone-learning-music",
-    "storage_bucket": "st182-xylophone-learning-music.firebasestorage.app"
+    "project_number": "803492606463",
+    "project_id": "st245-music-cat-funny",
+    "storage_bucket": "st245-music-cat-funny.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:662948067326:android:3870295a71454df69d72af",
+        "mobilesdk_app_id": "1:803492606463:android:a8fafedfdef60c6875f7ca",
         "android_client_info": {
-          "package_name": "com.temm"
+          "package_name": "com.cat.catpiano.music"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCAKquMsAjTjE3zMdT4iwNlLKU0iDxfs9k"
+          "current_key": "AIzaSyAHSouWjjJWWPxY_863o-mFIEbKP69p3Lw"
         }
       ],
       "services": {

@@ -24,12 +24,17 @@
         <activity
             android:name=".activity_app.secret.DancesActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            />
         <activity
             android:name=".activity_app.secret.SecretPlayActivity"
+            android:screenOrientation="portrait"
+
             android:exported="false" />
         <activity
             android:name=".activity_app.secret.SecretActivity"
+            android:screenOrientation="portrait"
+
             android:exported="false" />
         <activity
             android:name=".activity_app.splash.SplashActivity"
