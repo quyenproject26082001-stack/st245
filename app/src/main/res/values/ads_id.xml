@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="inter_splash" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="inter_all" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="native_language" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="native_intro" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+
+    <string name="native_cl_home" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="native_cl_letPlay" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="native_cl_Secret" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="native_cl_SecretPlay" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="native_SecretPlay" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="native_cl_SecretVideo" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+
+    <string name="reward_unlockBG" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="reward_unlockChar" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="reward_unlockInstru" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="reward_unlockSecret" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+
+
+
+    <string name="open_resume" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
+    <string name="native_all" translatable="false">ca-app-pub-3940256099942544/2247696110</string>
+</resources>

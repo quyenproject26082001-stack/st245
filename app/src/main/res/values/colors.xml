@@ -9,5 +9,23 @@
     <color name="red_app">#FF5959</color>
     <color name="active_color">#FF5959</color>
     <color name="inactive_color">#797878</color>
+    <color name="black">#000000</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorPrimary">#33393A</color>
+    <color name="lightTransparent">#33FFFFFF</color>
+
+    <!-- native ads colors -->
+    <color name="app">#FFCC33</color>
+    <color name="color_app">#FFCC33</color>
+    <color name="native_bg_ad">#A9FFFFFF</color>
+    <color name="native_bg_btn">#A9FFFFFF</color>
+    <color name="native_bg">#33CB88AA</color>
+    <color name="native_text_color">#000000</color>
+    <color name="native_text_color_btn">#FFFFFF</color>
+    <color name="native_text_color_black">#000000</color>
+    <color name="native_text_color_intro">#000000</color>
+    <color name="native_text_title">#000000</color>
+    <color name="native_text_body">#666666</color>
+    <color name="native_ad_text_color_banner">#FFFFFF</color>
 
 </resources>

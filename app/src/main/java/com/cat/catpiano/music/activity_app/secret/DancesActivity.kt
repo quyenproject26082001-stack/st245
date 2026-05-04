@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.SurfaceHolder
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.cat.catpiano.music.R
 import com.cat.catpiano.music.core.extensions.hideNavigation
+import com.cat.catpiano.music.core.extensions.loadNativeCollabAds
 import com.cat.catpiano.music.databinding.ActivityDancesBinding
 
 class DancesActivity : AppCompatActivity() {
@@ -35,6 +37,8 @@ class DancesActivity : AppCompatActivity() {
                 mediaPlayer = null
             }
         })
+
+        initNativeCollab()
     }
 
     // Phát video từ assets/video/{instrument}.mp4 trực tiếp qua FileDescriptor (không cần copy ra cache)
@@ -69,5 +73,8 @@ class DancesActivity : AppCompatActivity() {
         super.onDestroy()
         mediaPlayer?.release()
         mediaPlayer = null
+    }
+    fun initNativeCollab() {
+        loadNativeCollabAds(R.string.native_cl_SecretVideo, binding.flNativeCollab)
     }
 }

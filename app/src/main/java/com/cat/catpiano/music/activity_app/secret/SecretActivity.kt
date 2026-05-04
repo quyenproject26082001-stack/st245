@@ -9,7 +9,11 @@ import com.cat.catpiano.music.R
 import com.cat.catpiano.music.core.extensions.hideNavigation
 import com.cat.catpiano.music.core.helper.LanguageHelper
 import com.cat.catpiano.music.databinding.ActivitySecretBinding
+import android.widget.Toast
 import com.cat.catpiano.music.dialog.YesNoDialog
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.lvt.ads.callback.RewardCallback
+import com.lvt.ads.util.Admob
 import kotlin.collections.listOf
 
 class SecretActivity : AppCompatActivity() {
@@ -36,16 +40,33 @@ class SecretActivity : AppCompatActivity() {
             if (secret.isLocked) {
                 // Item đang khóa → hỏi người dùng có muốn mở khóa không
                 val dialog = YesNoDialog(this@SecretActivity, R.string.watch_video_to_unlock_this_item)
+                var check = false
                 dialog.onYesClick = {
-                    secret.isLocked = false
-                    prefs.edit().putBoolean("key_${secret.Instrument}", false).apply()
-                    adapter.notifyItemChanged(position)
-                    dialog.dismiss()   // ← thiếu cái này
-
+                    Admob.getInstance().loadAndShowRewardAds(this@SecretActivity, getString(R.string.reward_unlockSecret),
+                        object : RewardCallback() {
+                            override fun onAdFailedToLoad() {
+                                super.onAdFailedToLoad()
+                                Toast.makeText(this@SecretActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                            }
+                            override fun onEarnedReward(rewardItem: RewardItem?) {
+                                super.onEarnedReward(rewardItem)
+                                check = true
+                            }
+                            override fun onAdClosed() {
+                                super.onAdClosed()
+                                if (check) {
+                                    check = false
+                                    secret.isLocked = false
+                                    prefs.edit().putBoolean("key_${secret.Instrument}", false).apply()
+                                    adapter.notifyItemChanged(position)
+                                    dialog.dismiss()
+                                } else {
+                                    Toast.makeText(this@SecretActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        })
                 }
-                dialog.onNoClick = {
-                    dialog.dismiss()
-                }
+                dialog.onNoClick = { dialog.dismiss() }
                 dialog.show()
             } else {
                 // Item đã mở khóa → chuyển sang màn chơi, truyền instrument + skin theo vị trí
@@ -76,10 +97,21 @@ class SecretActivity : AppCompatActivity() {
 
         binding.btnBack.setOnClickListener { finish() }
 
+        initNativeCollab()
     }
 
     override fun onResume() {
         super.onResume()
         hideNavigation()
+    }
+
+
+
+    override fun onRestart() {
+        super.onRestart()
+        initNativeCollab()
+    }
+    fun initNativeCollab() {
+        Admob.getInstance().loadNativeCollapNotBanner(this,getString(R.string.native_cl_Secret),binding.flNativeCollab)
     }
 }

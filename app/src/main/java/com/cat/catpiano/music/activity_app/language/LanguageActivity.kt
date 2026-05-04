@@ -3,6 +3,7 @@ package com.cat.catpiano.music.activity_app.language
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import androidx.activity.viewModels
+import com.lvt.ads.util.Admob
 import androidx.lifecycle.lifecycleScope
 import com.cat.catpiano.music.R
 import com.cat.catpiano.music.core.base.BaseActivity
@@ -128,6 +129,10 @@ class LanguageActivity : BaseActivity<ActivityLanguageBinding>() {
             sharePreference.setLanguageChanged(true)
             handleBackLeftToRight()
         }
+    }
+
+    override fun initAds() {
+        Admob.getInstance().loadNativeAd(this, getString(R.string.native_language), binding.nativeAds, R.layout.ads_native_big_btn_top)
     }
 
     @SuppressLint("MissingSuperCall", "GestureBackNavigation")

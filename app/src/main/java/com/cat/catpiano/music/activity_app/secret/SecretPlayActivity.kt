@@ -13,9 +13,11 @@ import com.cat.catpiano.music.core.extensions.hideNavigation
 import com.cat.catpiano.music.core.extensions.animateScaleEffect
 import com.cat.catpiano.music.core.helper.LanguageHelper
 import com.cat.catpiano.music.core.extensions.openAssetImageDrawable
+import com.cat.catpiano.music.core.extensions.showInterAll
 import com.cat.catpiano.music.core.helper.NoteIconManager
 import com.cat.catpiano.music.core.helper.SharePreferenceHelper
 import com.cat.catpiano.music.databinding.ActivitySecretPlayBinding
+import com.lvt.ads.util.Admob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,7 +69,9 @@ class SecretPlayActivity : AppCompatActivity() {
 
         setupNoteButtons()
 
-        binding.btnBack.setOnClickListener { finish() }
+        binding.btnBack.setOnClickListener { showInterAll {  finish() }}
+
+        initNativeCollab()
     }
 
     // Xác định số nốt của instrument, ẩn/hiện layout phù hợp và wire buttons
@@ -205,5 +209,15 @@ class SecretPlayActivity : AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
         noteIconManager.hideAllIcons()
         soundPlayer.release()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        initNativeCollab()
+    }
+
+
+    fun initNativeCollab() {
+        Admob.getInstance().loadNativeCollapNotBanner(this,getString(R.string.native_cl_SecretPlay),binding.flNativeCollab)
     }
 }

@@ -23,11 +23,16 @@ import com.cat.catpiano.music.activity_app.background.BackgroundAdapter
 import com.cat.catpiano.music.activity_app.character.CharacterAdapter
 import com.cat.catpiano.music.activity_app.instrument.InstrumentAdapter
 import com.cat.catpiano.music.core.base.BaseActivity
+import com.cat.catpiano.music.core.extensions.showInterAll
 import com.cat.catpiano.music.data.model.custom.BackgroundItemModel
 import com.cat.catpiano.music.data.model.custom.CharacterModel
 import com.cat.catpiano.music.data.model.custom.InstrumentModel
 import com.cat.catpiano.music.databinding.ActivityPlayBinding
 import com.cat.catpiano.music.dialog.YesNoDialog
+import android.widget.Toast
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.lvt.ads.callback.RewardCallback
+import com.lvt.ads.util.Admob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -118,7 +123,7 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     override fun viewListener() {
         setupNoteButtons()
         setupBottomBar()
-        binding.btnBack.setOnClickListener { finish() }
+        binding.btnBack.setOnClickListener { showInterAll {  finish() }}
         onBackPressedDispatcher.addCallback(this, object :
             OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -301,15 +306,35 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun showUnlockCharacterDialog(item: CharacterModel) {
-        val dialog = YesNoDialog(this,  R.string.watch_video_to_unlock_this_item)
+        val dialog = YesNoDialog(this, R.string.watch_video_to_unlock_this_item)
+        var check = false
         dialog.onYesClick = {
-            val unlocked = sharePreference.getUnlockedCharacters()
-            unlocked.add(item.id)
-            sharePreference.setUnlockedCharacters(unlocked)
-            characterAdapter.submitList(characterAdapter.currentList.map {
-                if (it.id == item.id) it.copy(isUnlocked = true) else it
-            })
-            dialog.dismiss()
+            Admob.getInstance().loadAndShowRewardAds(this, getString(R.string.reward_unlockChar),
+                object : RewardCallback() {
+                    override fun onAdFailedToLoad() {
+                        super.onAdFailedToLoad()
+                        Toast.makeText(this@PlayActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onEarnedReward(rewardItem: RewardItem?) {
+                        super.onEarnedReward(rewardItem)
+                        check = true
+                    }
+                    override fun onAdClosed() {
+                        super.onAdClosed()
+                        if (check) {
+                            check = false
+                            val unlocked = sharePreference.getUnlockedCharacters()
+                            unlocked.add(item.id)
+                            sharePreference.setUnlockedCharacters(unlocked)
+                            characterAdapter.submitList(characterAdapter.currentList.map {
+                                if (it.id == item.id) it.copy(isUnlocked = true) else it
+                            })
+                            dialog.dismiss()
+                        } else {
+                            Toast.makeText(this@PlayActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
         }
         dialog.onNoClick = { dialog.dismiss() }
         dialog.onDismissClick = { dialog.dismiss() }
@@ -365,14 +390,34 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
 
     private fun showUnlockBackgroundDialog(item: BackgroundItemModel) {
         val dialog = YesNoDialog(this, R.string.watch_video_to_unlock_this_item)
+        var check = false
         dialog.onYesClick = {
-            val unlocked = sharePreference.getUnlockedBackgrounds()
-            unlocked.add(item.id)
-            sharePreference.setUnlockedBackgrounds(unlocked)
-            backgroundAdapter.submitList(backgroundAdapter.currentList.map {
-                if (it.id == item.id) it.copy(isUnlocked = true) else it
-            })
-            dialog.dismiss()
+            Admob.getInstance().loadAndShowRewardAds(this, getString(R.string.reward_unlockBG),
+                object : RewardCallback() {
+                    override fun onAdFailedToLoad() {
+                        super.onAdFailedToLoad()
+                        Toast.makeText(this@PlayActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onEarnedReward(rewardItem: RewardItem?) {
+                        super.onEarnedReward(rewardItem)
+                        check = true
+                    }
+                    override fun onAdClosed() {
+                        super.onAdClosed()
+                        if (check) {
+                            check = false
+                            val unlocked = sharePreference.getUnlockedBackgrounds()
+                            unlocked.add(item.id)
+                            sharePreference.setUnlockedBackgrounds(unlocked)
+                            backgroundAdapter.submitList(backgroundAdapter.currentList.map {
+                                if (it.id == item.id) it.copy(isUnlocked = true) else it
+                            })
+                            dialog.dismiss()
+                        } else {
+                            Toast.makeText(this@PlayActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
         }
         dialog.onNoClick = { dialog.dismiss() }
         dialog.onDismissClick = { dialog.dismiss() }
@@ -448,15 +493,35 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
     }
 
     private fun showUnlockInstrumentDialog(item: InstrumentModel) {
-        val dialog = YesNoDialog(this,  R.string.watch_video_to_unlock_this_item)
+        val dialog = YesNoDialog(this, R.string.watch_video_to_unlock_this_item)
+        var check = false
         dialog.onYesClick = {
-            val unlocked = sharePreference.getUnlockedInstruments()
-            unlocked.add(item.id)
-            sharePreference.setUnlockedInstruments(unlocked)
-            instrumentAdapter.submitList(instrumentAdapter.currentList.map {
-                if (it.id == item.id) it.copy(isUnlocked = true) else it
-            })
-            dialog.dismiss()
+            Admob.getInstance().loadAndShowRewardAds(this, getString(R.string.reward_unlockInstru),
+                object : RewardCallback() {
+                    override fun onAdFailedToLoad() {
+                        super.onAdFailedToLoad()
+                        Toast.makeText(this@PlayActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onEarnedReward(rewardItem: RewardItem?) {
+                        super.onEarnedReward(rewardItem)
+                        check = true
+                    }
+                    override fun onAdClosed() {
+                        super.onAdClosed()
+                        if (check) {
+                            check = false
+                            val unlocked = sharePreference.getUnlockedInstruments()
+                            unlocked.add(item.id)
+                            sharePreference.setUnlockedInstruments(unlocked)
+                            instrumentAdapter.submitList(instrumentAdapter.currentList.map {
+                                if (it.id == item.id) it.copy(isUnlocked = true) else it
+                            })
+                            dialog.dismiss()
+                        } else {
+                            Toast.makeText(this@PlayActivity, R.string.ad_loading_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
         }
         dialog.onNoClick = { dialog.dismiss() }
         dialog.onDismissClick = { dialog.dismiss() }
@@ -567,5 +632,17 @@ class PlayActivity : BaseActivity<ActivityPlayBinding>() {
         handler.removeCallbacksAndMessages(null)
         noteIconManager.hideAllIcons()
         soundPlayer.release()
+    }
+
+
+    override fun initAds() {
+        initNativeCollab()
+    }
+    override fun onRestart() {
+        super.onRestart()
+        initNativeCollab()
+    }
+    fun initNativeCollab() {
+        Admob.getInstance().loadNativeCollapNotBanner(this,getString(R.string.native_cl_letPlay),binding.flNativeCollab)
     }
 }

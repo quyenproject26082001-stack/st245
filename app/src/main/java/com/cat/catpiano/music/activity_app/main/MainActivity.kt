@@ -24,7 +24,9 @@ import com.cat.catpiano.music.core.extensions.gone
 import com.cat.catpiano.music.core.extensions.invisible
 import com.cat.catpiano.music.core.extensions.setGradientTextHeightColor
 import com.cat.catpiano.music.core.extensions.setOnSingleClick
+import com.cat.catpiano.music.core.extensions.showInterAll
 import com.cat.catpiano.music.core.extensions.strings
+import com.lvt.ads.util.Admob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,10 +57,10 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
             btnActionBarRight1.setOnSingleClick { startIntentRightToLeft(SettingsActivity::class.java) }
 
             btnPlayHome.setOnSingleClick {
-                startIntentRightToLeft(PlayActivity::class.java)
+                showInterAll { startIntentRightToLeft(PlayActivity::class.java) }
             }
 
-            btnSecret.setOnSingleClick { startIntentRightToLeft(SecretActivity::class.java) }
+            btnSecret.setOnSingleClick {showInterAll {startIntentRightToLeft(SecretActivity::class.java)} }
 
 
 
@@ -134,6 +136,14 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
             tv2.isSelected = true
         }
     }
+    override fun initAds() {
+        initNativeCollab()
+        Admob.getInstance().loadInterAll(this, getString(R.string.inter_all))
+        Admob.getInstance().loadNativeAll(this, getString(R.string.native_all))
+    }
+    fun initNativeCollab() {
+        Admob.getInstance().loadNativeCollapNotBanner(this,getString(R.string.native_cl_home),binding.flNativeCollab)
+    }
 
     override fun onRestart() {
         super.onRestart()
@@ -143,5 +153,7 @@ class MainActivity : BaseActivity<ActivityHomeBinding>() {
         } else {
             updateText()
         }
+        initNativeCollab()
+
     }
 }

@@ -68,4 +68,5 @@
     <string name="play_secret">PLAY</string>
     <string name="unlock_item_s">UNLOCK</string>
     <string name="unlock_item_secret">UNLOCK</string>
+    <string name="ad_loading_failed">Ad failed to load. Please try again.</string>
 </resources>
